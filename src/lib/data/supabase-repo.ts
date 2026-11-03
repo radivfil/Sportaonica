@@ -204,6 +204,15 @@ export class SupabaseRepository implements Repository {
   async cancelByToken(token: string) {
     return this.mapCancel(check(await this.db.rpc("cancel_registration", { p_token: token })));
   }
+  async promoteWaitlist(slotId: string) {
+    const out: Registration[] = [];
+    for (;;) {
+      const row = check(await this.db.rpc("promote_waitlist", { p_slot_id: slotId })) as Row | null;
+      if (!row || !row.id) break;
+      out.push(fromRow<Registration>(row));
+    }
+    return out;
+  }
   async deleteRegistration(id: string) {
     check(await this.db.rpc("delete_registration", { p_id: id }));
   }

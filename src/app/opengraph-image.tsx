@@ -34,9 +34,7 @@ export default async function OgImage() {
         <div style={{ position: "absolute", left: -80, top: -60, width: 360, height: 360, borderRadius: 999, background: "#FBCFD6" }} />
         <div style={{ position: "absolute", right: -90, bottom: -80, width: 420, height: 420, borderRadius: 999, background: "#BFE7E4" }} />
         <div style={{ position: "absolute", right: 120, top: -70, width: 220, height: 220, borderRadius: 999, background: "#FFF6CC" }} />
-        {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src={src(kids)} width={420} height={252} style={{ marginBottom: 6 }} alt="" />
-        {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src={src(logo)} width={720} height={171} alt="" />
         <div style={{ marginTop: 18, fontSize: 50, color: "#13385A", display: "flex" }}>Sport koji gradi zdrave navike za cijeli život!</div>
         <div

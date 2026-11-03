@@ -291,6 +291,13 @@ export class JsonRepository implements Repository {
     if (!token) return { cancelled: null, promoted: null };
     return this.mutate((db) => this.cancelInDb(db, db.registrations.find((r) => r.cancelToken === token)));
   }
+  async promoteWaitlist(slotId: string) {
+    return this.mutate((db) => {
+      const out: Registration[] = [];
+      for (let p = this.promote(db, slotId); p; p = this.promote(db, slotId)) out.push({ ...p });
+      return out;
+    });
+  }
   async deleteRegistration(id: string) {
     await this.mutate((db) => {
       const r = db.registrations.find((x) => x.id === id);

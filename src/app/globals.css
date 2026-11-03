@@ -25,6 +25,8 @@
     text-wrap: balance;
   }
   p { text-wrap: pretty; }
+  /* grid children may shrink below their min-content (prevents horizontal overflow on phones) */
+  .grid > * { min-width: 0; }
   :focus-visible {
     outline: 3px solid #0F4F7D;
     outline-offset: 3px;

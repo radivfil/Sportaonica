@@ -62,6 +62,8 @@ export interface Repository {
   moveRegistration(id: string, targetSlotId: string, opts?: { force?: boolean }): Promise<BookingResult & { promoted?: Registration | null }>;
   cancelRegistration(id: string): Promise<CancelResult>;
   cancelByToken(token: string): Promise<CancelResult>;
+  /** Fill free seats from the waitlist (FIFO). Returns the promoted registrations. */
+  promoteWaitlist(slotId: string): Promise<Registration[]>;
   /** GDPR erasure — permanently removes the record. */
   deleteRegistration(id: string): Promise<void>;
 
