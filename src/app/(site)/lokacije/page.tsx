@@ -21,7 +21,7 @@ export default async function LocationsPage() {
         crumbs={[{ name: "Lokacije", path: "/lokacije" }]}
       />
       <div className="container py-16">
-        <LocationCards locations={locations} slots={slots} activities={activities} />
+        <LocationCards locations={locations} slots={slots} activities={activities} headingLevel="h2" />
       </div>
       <JsonLd data={locations.map((l) => locationLd(l, slots, settings))} />
     </>

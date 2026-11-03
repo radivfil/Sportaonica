@@ -9,7 +9,8 @@ import { Icon } from "@/components/ui/Icon";
  * collapsed panels are `inert` so they are skipped by keyboard and screen readers.
  * Smooth height animation via the grid-template-rows 0fr → 1fr technique.
  */
-export function FaqAccordion({ items }: { items: FaqItem[] }) {
+export function FaqAccordion({ items, headingLevel = "h3" }: { items: FaqItem[]; headingLevel?: "h2" | "h3" }) {
+  const H = headingLevel;
   const [open, setOpen] = useState<string | null>(items[0]?.id ?? null);
   const base = useId();
   return (
@@ -20,7 +21,7 @@ export function FaqAccordion({ items }: { items: FaqItem[] }) {
         const panelId = `${base}-${item.id}-panel`;
         return (
           <div key={item.id} className={`rounded-3xl bg-white shadow-soft ring-2 transition-colors ${isOpen ? "ring-teal-300" : "ring-transparent"}`}>
-            <h3 className="font-sans text-base">
+            <H className="font-sans text-base">
               <button
                 id={btnId}
                 type="button"
@@ -34,7 +35,7 @@ export function FaqAccordion({ items }: { items: FaqItem[] }) {
                   <Icon name="chevron-down" className={`h-5 w-5 transition-transform duration-300 ${isOpen ? "rotate-180" : ""}`} />
                 </span>
               </button>
-            </h3>
+            </H>
             <div
               id={panelId}
               role="region"

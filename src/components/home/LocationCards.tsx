@@ -28,7 +28,19 @@ function MiniMap({ tint, seed }: { tint: string; seed: number }) {
   );
 }
 
-export function LocationCards({ locations, slots, activities }: { locations: Location[]; slots: SlotWithStats[]; activities: Activity[] }) {
+export function LocationCards({
+  locations,
+  slots,
+  activities,
+  headingLevel = "h3",
+}: {
+  locations: Location[];
+  slots: SlotWithStats[];
+  activities: Activity[];
+  headingLevel?: "h2" | "h3";
+}) {
+  const H = headingLevel;
+  const H4 = headingLevel === "h2" ? "h3" : "h4";
   const act = new Map(activities.map((a) => [a.id, a]));
   return (
     <ul className="grid gap-6 md:grid-cols-3">
@@ -42,7 +54,7 @@ export function LocationCards({ locations, slots, activities }: { locations: Loc
                 <DemoBadge className="absolute right-3 top-3" label="Adresa: potvrditi" />
               </div>
               <div className="flex flex-1 flex-col p-6">
-                <h3 className="text-2xl font-extrabold">{loc.name}</h3>
+                <H className="text-2xl font-extrabold">{loc.name}</H>
                 <p className="mt-1 font-semibold text-ink-soft">{loc.venue}</p>
                 <address className="mt-3 flex items-start gap-2 not-italic text-ink">
                   <Icon name="pin" className="mt-0.5 h-5 w-5 shrink-0 text-coral" />
@@ -52,7 +64,7 @@ export function LocationCards({ locations, slots, activities }: { locations: Loc
                     {loc.postalCode} {loc.city}
                   </span>
                 </address>
-                <h4 className="mt-5 text-sm font-extrabold uppercase tracking-wide text-ink-soft">Raspored</h4>
+                <H4 className="mt-5 text-sm font-extrabold uppercase tracking-wide text-ink-soft">Raspored</H4>
                 <ul className="mt-2 grid gap-1.5 text-[0.95rem]">
                   {own.map((s) => (
                     <li key={s.id} className="flex items-baseline justify-between gap-3 border-b border-dashed border-ink/10 pb-1.5">

@@ -14,7 +14,7 @@ export default function GalleryPage() {
     <>
       <PageHero title="Galerija" intro="Trenuci s naših treninga. Fotografije djece objavljujemo isključivo uz pisanu privolu roditelja." crumbs={[{ name: "Galerija", path: "/galerija" }]} />
       <div className="container py-16">
-        <Gallery images={GALLERY} />
+        <Gallery images={GALLERY} priorityCount={2} />
       </div>
     </>
   );

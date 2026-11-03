@@ -6,7 +6,7 @@ import { Star, Sparkle } from "@/components/ui/Doodles";
 
 export function CtaBand({ telHref, phone }: { telHref: string; phone: string }) {
   return (
-    <section aria-labelledby="cta-title" className="container py-16 sm:py-20">
+    <section aria-labelledby="cta-title" className="cv-auto container py-16 sm:py-20">
       <div className="relative overflow-hidden rounded-[2.5rem] bg-navy px-6 py-12 text-white sm:px-12 sm:py-14">
         <div aria-hidden="true" className="absolute -right-16 -top-16 h-64 w-64 rounded-full bg-teal-500/30" />
         <div aria-hidden="true" className="absolute -bottom-24 left-1/3 h-56 w-56 rounded-full bg-coral/30" />

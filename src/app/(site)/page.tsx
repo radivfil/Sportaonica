@@ -37,7 +37,7 @@ export default async function HomePage() {
       <Benefits />
 
       <Wave fill="#ffffff" />
-      <section aria-labelledby="activities-title" className="bg-white pb-20 pt-10 sm:pb-24">
+      <section aria-labelledby="activities-title" className="cv-auto bg-white pb-20 pt-10 sm:pb-24">
         <div className="container">
           <SectionHeading
             id="activities-title"
@@ -50,7 +50,7 @@ export default async function HomePage() {
       </section>
       <Wave fill="#ffffff" flip />
 
-      <section aria-labelledby="schedule-title" className="py-20 sm:py-24">
+      <section aria-labelledby="schedule-title" className="cv-auto py-20 sm:py-24">
         <div className="container">
           <SectionHeading
             id="schedule-title"
@@ -68,7 +68,7 @@ export default async function HomePage() {
       </section>
 
       <Wave fill="#F1FAF9" />
-      <section aria-labelledby="locations-title" className="bg-teal-50 pb-20 pt-10 sm:pb-24">
+      <section aria-labelledby="locations-title" className="cv-auto bg-teal-50 pb-20 pt-10 sm:pb-24">
         <div className="container">
           <SectionHeading id="locations-title" eyebrow="Lokacije" title="Blizu vas — na tri lokacije" intro="Treninge održavamo u Božjakovini, Brckovljanima i Sesvetskom Kraljevcu." />
           <LocationCards locations={locations} slots={slots} activities={activities} />
@@ -76,7 +76,7 @@ export default async function HomePage() {
       </section>
       <Wave fill="#F1FAF9" flip />
 
-      <section aria-labelledby="trainer-title" className="py-20 sm:py-24">
+      <section aria-labelledby="trainer-title" className="cv-auto py-20 sm:py-24">
         <div className="container">
           <TrainerBlock trainer={content.trainer} />
         </div>
@@ -85,7 +85,7 @@ export default async function HomePage() {
       {posts.length > 0 && (
         <>
           <Wave fill="#FFF5F8" />
-          <section aria-labelledby="news-title" className="bg-pink-50 pb-20 pt-10 sm:pb-24">
+          <section aria-labelledby="news-title" className="cv-auto bg-pink-50 pb-20 pt-10 sm:pb-24">
             <div className="container">
               <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-end">
                 <SectionHeading id="news-title" eyebrow="Novosti" title="Obavijesti i novosti" align="left" />
@@ -106,7 +106,7 @@ export default async function HomePage() {
         </>
       )}
 
-      <section aria-labelledby="gallery-title" className="py-20 sm:py-24">
+      <section aria-labelledby="gallery-title" className="cv-auto py-20 sm:py-24">
         <div className="container">
           <SectionHeading id="gallery-title" eyebrow="Galerija" title="Osmijesi s treninga" />
           <Gallery images={GALLERY} limit={8} />
@@ -119,7 +119,7 @@ export default async function HomePage() {
       </section>
 
       <Wave fill="#FFFBEA" />
-      <section aria-labelledby="faq-title" className="bg-butter-50 pb-20 pt-10 sm:pb-24">
+      <section aria-labelledby="faq-title" className="cv-auto bg-butter-50 pb-20 pt-10 sm:pb-24">
         <div className="container max-w-3xl">
           <SectionHeading id="faq-title" eyebrow="Česta pitanja" title="Imate pitanje?" intro="Najčešća pitanja roditelja na jednom mjestu." />
           <FaqAccordion items={content.faq.slice(0, 6)} />
@@ -132,7 +132,7 @@ export default async function HomePage() {
       </section>
       <Wave fill="#FFFBEA" flip />
 
-      <section aria-labelledby="contact-title" className="py-20 sm:py-24">
+      <section aria-labelledby="contact-title" className="cv-auto py-20 sm:py-24">
         <div className="container">
           <SectionHeading id="contact-title" eyebrow="Kontakt" title="Javite nam se" intro="Rado ćemo odgovoriti na sva pitanja o programu, terminima i upisima." />
           <div className="grid gap-8 lg:grid-cols-[1fr_1.4fr]">

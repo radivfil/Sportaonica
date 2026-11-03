@@ -81,7 +81,7 @@ function Deco({ kind, color }: { kind: string; color: string }) {
 
 export function Benefits() {
   return (
-    <section aria-labelledby="benefits-title" className="relative py-20 sm:py-24">
+    <section aria-labelledby="benefits-title" className="cv-auto relative py-20 sm:py-24">
       <div className="container">
         <SectionHeading
           id="benefits-title"

@@ -1,19 +1,28 @@
 import type { Metadata, Viewport } from "next";
-import { Baloo_2, Nunito_Sans } from "next/font/google";
+import localFont from "next/font/local";
 import "./globals.css";
 import { DEFAULT_DESCRIPTION, SITE_NAME, SITE_URL, SLOGAN } from "@/lib/site";
 
-const display = Baloo_2({
-  subsets: ["latin", "latin-ext"],
-  weight: ["600", "700", "800"],
+/**
+ * Self-hosted variable fonts (SIL OFL), subset to Latin + Croatian letters
+ * (č ć đ š ž) and typographic punctuation — see docs/design-brief.md.
+ * One small file per family keeps fonts off the LCP critical path.
+ */
+const display = localFont({
+  src: "../assets/fonts/Baloo2-Sportaonica.woff2",
+  weight: "600 800",
   variable: "--font-display",
   display: "swap",
+  fallback: ["ui-rounded", "system-ui", "sans-serif"],
+  adjustFontFallback: "Arial",
 });
-const body = Nunito_Sans({
-  subsets: ["latin", "latin-ext"],
-  weight: ["400", "600", "700", "800"],
+const body = localFont({
+  src: "../assets/fonts/NunitoSans-Sportaonica.woff2",
+  weight: "400 800",
   variable: "--font-body",
   display: "swap",
+  fallback: ["system-ui", "-apple-system", "Segoe UI", "sans-serif"],
+  adjustFontFallback: "Arial",
 });
 
 export const metadata: Metadata = {

@@ -12,10 +12,10 @@ export function Hero({ locationsCount }: { locationsCount: number }) {
     <section aria-labelledby="hero-title" className="relative -mt-[68px] overflow-hidden bg-flyer pt-[68px] lg:-mt-[76px] lg:pt-[76px]">
       {/* decorative, CSS-only animation (respects prefers-reduced-motion via globals.css) */}
       <div aria-hidden="true" className="pointer-events-none absolute inset-0">
-        <Blob className="absolute -left-24 top-10 w-72 animate-blob opacity-70 sm:w-96" fill="#FBCFD6" variant={0} />
-        <Blob className="absolute -right-28 top-1/3 w-80 animate-blob opacity-60 [animation-delay:-5s] sm:w-[28rem]" fill="#BFE7E4" variant={1} />
-        <Blob className="absolute -bottom-24 left-1/4 w-72 animate-blob opacity-70 [animation-delay:-9s]" fill="#FFF6CC" variant={2} />
-        <div className="absolute inset-0 bg-dots opacity-60 [mask-image:linear-gradient(to_bottom,black,transparent_70%)]" />
+        <Blob className="absolute -left-24 top-10 w-72 opacity-70 sm:w-96" fill="#FBCFD6" variant={0} />
+        <Blob className="absolute -right-28 top-1/3 w-80 opacity-60 sm:w-[28rem]" fill="#BFE7E4" variant={1} />
+        <Blob className="absolute -bottom-32 -left-10 w-72 opacity-70" fill="#FFF6CC" variant={2} />
+        <div className="absolute inset-x-0 top-0 h-2/3 bg-dots opacity-50" />
         <Star className="absolute left-[6%] top-[22%] hidden w-9 animate-wiggle sm:block" />
         <Sparkle className="absolute right-[8%] top-[16%] w-7 animate-float-slow" fill="#F2ACA4" />
         <Heart className="absolute bottom-[18%] left-[3%] w-8 animate-float" fill="#F2ACA4" />

@@ -4,7 +4,7 @@ import type { Post } from "@/lib/data/types";
 import { formatDate } from "@/lib/format";
 import { Icon } from "@/components/ui/Icon";
 
-export function PostCard({ post, headingLevel = "h3" }: { post: Post; headingLevel?: "h2" | "h3" }) {
+export function PostCard({ post, headingLevel = "h3", priority = false }: { post: Post; headingLevel?: "h2" | "h3"; priority?: boolean }) {
   const H = headingLevel;
   return (
     <article className="lift card group relative flex h-full flex-col overflow-hidden focus-within:ring-4 focus-within:ring-navy/40">
@@ -14,6 +14,7 @@ export function PostCard({ post, headingLevel = "h3" }: { post: Post; headingLev
             src={post.coverImage}
             alt={post.coverAlt || ""}
             fill
+            priority={priority}
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 380px"
             className="object-cover transition-transform duration-500 group-hover:scale-105"
           />

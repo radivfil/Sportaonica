@@ -10,7 +10,7 @@ import { CookieSettingsButton } from "./CookieBanner";
 export function Footer({ settings }: { settings: SiteSettings }) {
   const year = new Date().getFullYear();
   return (
-    <footer className="mt-auto">
+    <footer className="cv-auto mt-auto">
       <Wave fill="#0B3B5E" />
       <div className="bg-navy-700 pb-28 pt-12 text-white lg:pb-12">
         <div className="container grid gap-10 md:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr_1.2fr]">
@@ -28,10 +28,10 @@ export function Footer({ settings }: { settings: SiteSettings }) {
 
           <nav aria-label="Poveznice u podnožju">
             <h2 className="font-display text-lg font-bold text-white">Stranice</h2>
-            <ul className="mt-3 grid gap-2">
+            <ul className="mt-2 grid">
               {NAV.map((n) => (
                 <li key={n.href}>
-                  <Link href={n.href} className="text-white/85 hover:text-white hover:underline">
+                  <Link href={n.href} className="inline-flex min-h-[36px] items-center text-white/85 hover:text-white hover:underline">
                     {n.label}
                   </Link>
                 </li>
@@ -79,7 +79,7 @@ export function Footer({ settings }: { settings: SiteSettings }) {
 
         <div className="container mt-10 flex flex-col gap-3 border-t border-white/15 pt-6 text-sm text-white/75 sm:flex-row sm:items-center sm:justify-between">
           <p>© {year} Sportaonica. Sva prava pridržana.</p>
-          <div className="flex flex-wrap gap-x-5 gap-y-2">
+          <div className="flex flex-wrap gap-x-5 gap-y-1 [&>*]:inline-flex [&>*]:min-h-[36px] [&>*]:items-center">
             <Link href="/politika-privatnosti" className="hover:text-white hover:underline">Politika privatnosti</Link>
             <CookieSettingsButton className="hover:text-white hover:underline" />
             <Link href="/admin" className="hover:text-white hover:underline">Admin</Link>

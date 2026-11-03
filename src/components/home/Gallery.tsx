@@ -6,7 +6,7 @@ import type { GalleryImage } from "@/lib/gallery";
 import { Icon } from "@/components/ui/Icon";
 
 /** Responsive masonry-like grid + accessible lightbox (native <dialog>, keyboard + swipe). */
-export function Gallery({ images, limit }: { images: GalleryImage[]; limit?: number }) {
+export function Gallery({ images, limit, priorityCount = 0 }: { images: GalleryImage[]; limit?: number; priorityCount?: number }) {
   const shown = limit ? images.slice(0, limit) : images;
   const [index, setIndex] = useState<number | null>(null);
   const dialogRef = useRef<HTMLDialogElement>(null);
@@ -53,6 +53,7 @@ export function Gallery({ images, limit }: { images: GalleryImage[]; limit?: num
                 alt={img.alt}
                 width={img.width}
                 height={img.height}
+                priority={i < priorityCount}
                 sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 290px"
                 className="h-auto w-full transition-transform duration-500 group-hover:scale-105"
               />

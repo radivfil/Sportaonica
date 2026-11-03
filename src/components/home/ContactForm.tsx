@@ -5,7 +5,8 @@ import { useEffect, useRef, useState } from "react";
 import { Icon } from "@/components/ui/Icon";
 import { Turnstile } from "@/components/ui/Turnstile";
 
-export function ContactForm() {
+export function ContactForm({ headingLevel = "h3" }: { headingLevel?: "h2" | "h3" }) {
+  const H = headingLevel;
   const [state, setState] = useState<"idle" | "sending" | "sent">("idle");
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [message, setMessage] = useState<string | null>(null);
@@ -50,7 +51,7 @@ export function ContactForm() {
         <span className="inline-flex h-16 w-16 items-center justify-center rounded-full bg-teal-200">
           <Icon name="check" className="h-8 w-8" />
         </span>
-        <h3 className="mt-4 text-2xl font-extrabold">Hvala na poruci!</h3>
+        <H className="mt-4 text-2xl font-extrabold">Hvala na poruci!</H>
         <p className="mt-2 text-ink-soft">Javit ćemo vam se u najkraćem mogućem roku.</p>
       </div>
     );
@@ -72,7 +73,7 @@ export function ContactForm() {
 
   return (
     <form onSubmit={onSubmit} noValidate className="card grid gap-4 p-6 sm:p-8">
-      <h3 className="text-2xl font-extrabold">Pošaljite nam poruku</h3>
+      <H className="text-2xl font-extrabold">Pošaljite nam poruku</H>
       {field("name", "Ime i prezime", { autoComplete: "name", required: true })}
       <div className="grid gap-4 sm:grid-cols-2">
         {field("email", "E-mail", { type: "email", autoComplete: "email", inputMode: "email", required: true })}

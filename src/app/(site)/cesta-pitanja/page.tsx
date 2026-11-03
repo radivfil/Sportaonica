@@ -20,7 +20,7 @@ export default async function FaqPage() {
     <>
       <PageHero title="Česta pitanja" intro="Odgovori na pitanja koja roditelji najčešće postavljaju." crumbs={[{ name: "Česta pitanja", path: "/cesta-pitanja" }]} />
       <div className="container max-w-3xl py-16">
-        <FaqAccordion items={content.faq} />
+        <FaqAccordion items={content.faq} headingLevel="h2" />
         <div className="mt-12 rounded-4xl bg-teal-100 p-6 text-center sm:p-8">
           <h2 className="text-2xl font-extrabold">Niste pronašli odgovor?</h2>
           <p className="mt-2 text-ink">Nazovite nas ili pošaljite poruku — rado ćemo pomoći.</p>

@@ -22,7 +22,7 @@ export default async function NewsPage() {
           <ul className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {posts.map((p, i) => (
               <Reveal as="li" key={p.id} delay={(i % 3) * 0.06}>
-                <PostCard post={p} headingLevel="h2" />
+                <PostCard post={p} headingLevel="h2" priority={i === 0} />
               </Reveal>
             ))}
           </ul>

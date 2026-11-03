@@ -17,7 +17,7 @@ export default async function ContactPage() {
       <PageHero title="Kontakt" intro="Imate pitanje o programu, terminima ili upisima? Javite nam se!" crumbs={[{ name: "Kontakt", path: "/kontakt" }]} />
       <div className="container grid gap-8 py-16 lg:grid-cols-[1fr_1.4fr]">
         <ContactInfo settings={settings} />
-        <ContactForm />
+        <ContactForm headingLevel="h2" />
       </div>
     </>
   );
