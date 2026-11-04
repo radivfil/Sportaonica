@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { SiteSettings } from "@/lib/data/types";
-import { NAV } from "@/lib/site";
+import { NAV, STATIC_DEMO } from "@/lib/site";
 import { telHref } from "@/lib/format";
 import { Icon } from "@/components/ui/Icon";
 import { Wave } from "@/components/ui/Wave";
@@ -82,7 +82,7 @@ export function Footer({ settings }: { settings: SiteSettings }) {
           <div className="flex flex-wrap gap-x-5 gap-y-1 [&>*]:inline-flex [&>*]:min-h-[36px] [&>*]:items-center">
             <Link href="/politika-privatnosti" className="hover:text-white hover:underline">Politika privatnosti</Link>
             <CookieSettingsButton className="hover:text-white hover:underline" />
-            <Link href="/admin" className="hover:text-white hover:underline">Admin</Link>
+            {!STATIC_DEMO && <Link href="/admin" className="hover:text-white hover:underline">Admin</Link>}
           </div>
         </div>
       </div>

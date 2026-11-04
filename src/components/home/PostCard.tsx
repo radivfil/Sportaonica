@@ -3,6 +3,7 @@ import Link from "next/link";
 import type { Post } from "@/lib/data/types";
 import { formatDate } from "@/lib/format";
 import { Icon } from "@/components/ui/Icon";
+import { asset } from "@/lib/site";
 
 export function PostCard({ post, headingLevel = "h3", priority = false }: { post: Post; headingLevel?: "h2" | "h3"; priority?: boolean }) {
   const H = headingLevel;
@@ -11,7 +12,7 @@ export function PostCard({ post, headingLevel = "h3", priority = false }: { post
       <div className="relative aspect-[16/10] overflow-hidden bg-pink-100">
         {post.coverImage && (
           <Image
-            src={post.coverImage}
+            src={asset(post.coverImage)}
             alt={post.coverAlt || ""}
             fill
             priority={priority}

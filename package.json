@@ -10,7 +10,8 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:e2e": "playwright test",
-    "seed:reset": "node scripts/reset-demo-data.mjs"
+    "seed:reset": "node scripts/reset-demo-data.mjs",
+    "build:pages": "node scripts/build-pages.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.118.0",

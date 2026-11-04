@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { GalleryImage } from "@/lib/gallery";
 import { Icon } from "@/components/ui/Icon";
+import { asset } from "@/lib/site";
 
 /** Responsive masonry-like grid + accessible lightbox (native <dialog>, keyboard + swipe). */
 export function Gallery({ images, limit, priorityCount = 0 }: { images: GalleryImage[]; limit?: number; priorityCount?: number }) {
@@ -49,7 +50,7 @@ export function Gallery({ images, limit, priorityCount = 0 }: { images: GalleryI
               aria-label={`Povećaj fotografiju: ${img.alt}`}
             >
               <Image
-                src={img.src}
+                src={asset(img.src)}
                 alt={img.alt}
                 width={img.width}
                 height={img.height}
@@ -81,7 +82,7 @@ export function Gallery({ images, limit, priorityCount = 0 }: { images: GalleryI
             <figure className="relative flex max-h-[80vh] w-full max-w-5xl flex-col items-center">
               <Image
                 key={current.src}
-                src={current.src}
+                src={asset(current.src)}
                 alt={current.alt}
                 width={current.width}
                 height={current.height}

@@ -17,5 +17,15 @@ export const NAV = [
   { href: "/kontakt", label: "Kontakt" },
 ] as const;
 
+/**
+ * Static preview build (GitHub Pages): no server, so forms are simulated and
+ * the admin is unavailable. Enabled with NEXT_PUBLIC_STATIC_DEMO=1.
+ */
+export const STATIC_DEMO = process.env.NEXT_PUBLIC_STATIC_DEMO === "1";
+/** URL prefix when hosted in a sub-folder (e.g. /Sportaonica on GitHub Pages). */
+export const BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH || "";
+/** Prefix a /public asset path with BASE_PATH (next/image does not do this for string src). */
+export const asset = (src: string | undefined) => (src && src.startsWith("/") && !src.startsWith(BASE_PATH + "/") ? `${BASE_PATH}${src}` : src ?? "");
+
 /** Show small "DEMO" markers on placeholder content (turn off for production). */
 export const SHOW_DEMO_BADGES = process.env.NEXT_PUBLIC_DEMO_BADGES !== "0";

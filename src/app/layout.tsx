@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
-import { DEFAULT_DESCRIPTION, SITE_NAME, SITE_URL, SLOGAN } from "@/lib/site";
+import { BASE_PATH, DEFAULT_DESCRIPTION, SITE_NAME, SITE_URL, SLOGAN, STATIC_DEMO } from "@/lib/site";
 
 /**
  * Self-hosted variable fonts (SIL OFL), subset to Latin + Croatian letters
@@ -53,7 +53,9 @@ export const metadata: Metadata = {
   twitter: { card: "summary_large_image", title: `${SITE_NAME} — ${SLOGAN}`, description: DEFAULT_DESCRIPTION },
   alternates: { canonical: "/" },
   formatDetection: { telephone: false },
-  icons: { icon: [{ url: "/icon.svg", type: "image/svg+xml" }], apple: "/apple-icon.png" },
+  icons: { icon: [{ url: `${BASE_PATH}/icon.svg`, type: "image/svg+xml" }], apple: `${BASE_PATH}/apple-icon.png` },
+  // the static preview must not compete with the real site in search results
+  ...(STATIC_DEMO ? { robots: { index: false, follow: false } } : {}),
 };
 
 export const viewport: Viewport = {

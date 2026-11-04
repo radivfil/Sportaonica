@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { Icon } from "@/components/ui/Icon";
 import { Turnstile } from "@/components/ui/Turnstile";
+import { STATIC_DEMO } from "@/lib/site";
 
 export function ContactForm({ headingLevel = "h3" }: { headingLevel?: "h2" | "h3" }) {
   const H = headingLevel;
@@ -21,6 +22,12 @@ export function ContactForm({ headingLevel = "h3" }: { headingLevel?: "h2" | "h3
     const fd = new FormData(e.currentTarget);
     setState("sending");
     setMessage(null);
+    if (STATIC_DEMO) {
+      // static preview: no server — simulate a successful send
+      await new Promise((r) => setTimeout(r, 700));
+      setState("sent");
+      return;
+    }
     const res = await fetch("/api/contact", {
       method: "POST",
       headers: { "Content-Type": "application/json" },

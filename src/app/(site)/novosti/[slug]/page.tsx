@@ -8,7 +8,7 @@ import { JsonLd } from "@/components/seo/JsonLd";
 import { Icon } from "@/components/ui/Icon";
 import { formatDate } from "@/lib/format";
 import { sanitizePostHtml } from "@/lib/sanitize";
-import { SITE_NAME, SITE_URL } from "@/lib/site";
+import { SITE_NAME, SITE_URL, asset } from "@/lib/site";
 import { isAdmin } from "@/lib/admin-guard";
 
 type Params = Promise<{ slug: string }>;
@@ -74,7 +74,7 @@ export default async function PostPage({ params }: { params: Params }) {
       <div className="container max-w-3xl">
         {post.coverImage && (
           <div className="relative -mt-2 mb-10 aspect-[16/9] overflow-hidden rounded-4xl bg-pink-100 shadow-soft">
-            <Image src={post.coverImage} alt={post.coverAlt || ""} fill priority sizes="(max-width: 800px) 100vw, 768px" className="object-cover" />
+            <Image src={asset(post.coverImage)} alt={post.coverAlt || ""} fill priority sizes="(max-width: 800px) 100vw, 768px" className="object-cover" />
           </div>
         )}
         <div className="prose-sport" dangerouslySetInnerHTML={{ __html: sanitizePostHtml(post.contentHtml) }} />

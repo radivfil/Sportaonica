@@ -16,6 +16,7 @@ export type BookingSuccess = {
   activity: Activity;
   location: Location;
   slotData: SlotWithStats;
+  staticPreview?: boolean;
 };
 
 /** Weekly-recurring .ics event, generated in the browser. */
@@ -113,6 +114,12 @@ export function Confirmation({ data }: { data: BookingSuccess }) {
         </Link>
       </div>
 
+      {data.staticPreview && (
+        <p className="relative mx-auto mt-8 max-w-lg rounded-2xl border-2 border-dashed border-ink/20 bg-white p-4 text-sm text-ink-soft">
+          <strong className="text-ink">Pregled dizajna:</strong> ovo je statična verzija stranice — prijava nije spremljena niti je poslan e-mail.
+          U punoj verziji roditelj odmah dobiva potvrdu e-mailom, a vlasnik obavijest.
+        </p>
+      )}
       {data.demoCancelUrl && (
         <p className="relative mx-auto mt-8 max-w-lg rounded-2xl border-2 border-dashed border-ink/20 bg-white p-4 text-sm text-ink-soft">
           <strong className="text-ink">Demo način:</strong> e-mailovi se ispisuju u konzolu poslužitelja. Osobna poveznica za otkazivanje:{" "}

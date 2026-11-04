@@ -1,3 +1,4 @@
+import Link from "next/link";
 import type { Activity, Location, SlotWithStats } from "@/lib/data/types";
 import { WEEKDAYS } from "@/lib/format";
 import { Icon } from "@/components/ui/Icon";
@@ -79,9 +80,9 @@ export function LocationCards({
                   <a href={loc.mapUrl} target="_blank" rel="noopener noreferrer" className="btn-secondary !min-h-[44px] flex-1 !px-4 text-base">
                     <Icon name="map" /> Karta
                   </a>
-                  <a href={`/upisi?lokacija=${loc.slug}`} className="btn-navy !min-h-[44px] flex-1 !px-4 text-base">
+                  <Link href={`/upisi?lokacija=${loc.slug}`} className="btn-navy !min-h-[44px] flex-1 !px-4 text-base">
                     Termini
-                  </a>
+                  </Link>
                 </div>
               </div>
             </article>

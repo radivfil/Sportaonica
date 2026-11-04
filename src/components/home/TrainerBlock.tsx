@@ -2,6 +2,7 @@ import Image from "next/image";
 import type { TrainerBlock as Trainer } from "@/lib/data/types";
 import girlWave from "../../../public/illustrations/girl-wave.png";
 import { Icon } from "@/components/ui/Icon";
+import { asset } from "@/lib/site";
 import { DemoBadge } from "@/components/ui/DemoBadge";
 import { Star, Whistle } from "@/components/ui/Doodles";
 
@@ -12,7 +13,7 @@ export function TrainerBlock({ trainer }: { trainer: Trainer }) {
         <div aria-hidden="true" className="absolute inset-0 rotate-3 rounded-[3rem] bg-teal-200 sm:-inset-4" />
         <div className="relative aspect-[4/5] overflow-hidden rounded-[2.75rem] bg-pink-100 shadow-lift ring-8 ring-white">
           {trainer.photo ? (
-            <Image src={trainer.photo} alt={`${trainer.name}, ${trainer.title}`} fill sizes="(max-width: 1024px) 90vw, 400px" className="object-cover" />
+            <Image src={asset(trainer.photo)} alt={`${trainer.name}, ${trainer.title}`} fill sizes="(max-width: 1024px) 90vw, 400px" className="object-cover" />
           ) : (
             // TODO(client): upload trainer photo in Admin → Sadržaj → O treneru
             <div className="flex h-full flex-col items-center justify-end bg-gradient-to-b from-pink-100 to-butter-100 p-6 text-center">

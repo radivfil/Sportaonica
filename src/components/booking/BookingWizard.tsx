@@ -8,6 +8,7 @@ import type { Activity, Location, SlotWithStats } from "@/lib/data/types";
 import { WEEKDAYS, seatsLabel } from "@/lib/format";
 import { ageOn, isAgeInRange } from "@/lib/age";
 import { SOURCES } from "@/lib/validation";
+import { STATIC_DEMO } from "@/lib/site";
 import { Icon } from "@/components/ui/Icon";
 import { BallLoader } from "@/components/ui/BallLoader";
 import { Turnstile } from "@/components/ui/Turnstile";
@@ -117,8 +118,27 @@ export function BookingWizard({ activities, locations, slots: initialSlots, init
   const formRef = useRef<HTMLFormElement>(null);
   const stepRefs = useRef<(HTMLElement | null)[]>([]);
 
+  // Static preview has no server-side searchParams: apply ?aktivnost/&lokacija/&termin on the client.
+  useEffect(() => {
+    if (!STATIC_DEMO) return;
+    const sp = new URLSearchParams(window.location.search);
+    const s = initialSlots.find((x) => x.id === sp.get("termin"));
+    const a = activities.find((x) => x.slug === sp.get("aktivnost"));
+    const l = locations.find((x) => x.slug === sp.get("lokacija"));
+    if (s) {
+      setActivityId(s.activityId);
+      setLocationId(s.locationId);
+      setSlotId(s.id);
+      setWaitlist(s.isFull);
+    } else {
+      if (a) setActivityId(a.id);
+      if (l) setLocationId(l.id);
+    }
+  }, [activities, locations, initialSlots]);
+
   useEffect(() => {
     startedAt.current = Date.now();
+    if (STATIC_DEMO) return; // no API on a static host
     // refresh availability (page may have been cached by the browser)
     fetch("/api/slots", { cache: "no-store" })
       .then((r) => (r.ok ? r.json() : null))
@@ -214,6 +234,30 @@ export function BookingWizard({ activities, locations, slots: initialSlots, init
       return;
     }
     setSubmitting(true);
+    if (STATIC_DEMO) {
+      // static preview: simulate the server response, nothing is stored
+      await new Promise((r) => setTimeout(r, 900));
+      const asWaitlist = forceWaitlist || waitlist || slot.isFull;
+      setSuccess({
+        ok: true,
+        registration: { id: "pregled", status: asWaitlist ? "waitlist" : "confirmed", childName: form.childName, email: form.email },
+        slot: {
+          activityName: activity!.name,
+          locationName: location!.name,
+          venue: location!.venue,
+          address: location!.address,
+          day: WEEKDAYS[slot.dayOfWeek],
+          time: `${slot.startTime}–${slot.endTime}`,
+        },
+        waitlistPosition: asWaitlist ? slot.waitlistCount + 1 : null,
+        activity: activity!,
+        location: location!,
+        slotData: slot,
+        staticPreview: true,
+      });
+      setSubmitting(false);
+      return;
+    }
     try {
       const res = await fetch("/api/registrations", {
         method: "POST",
