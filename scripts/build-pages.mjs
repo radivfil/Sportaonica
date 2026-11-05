@@ -10,7 +10,7 @@
  * The real site (bookings, admin, e-mails) runs on Cloudflare Workers + Supabase.
  */
 import { spawn, execFileSync } from "node:child_process";
-import { cpSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
+import { cpSync, existsSync, mkdirSync, renameSync, rmSync, writeFileSync } from "node:fs";
 import path from "node:path";
 
 const REPO = process.env.PAGES_REPO || "Sportaonica";
@@ -34,7 +34,17 @@ const env = {
 
 rmSync(".data/pages", { recursive: true, force: true });
 console.log("› next build (static preview)…");
-execFileSync(process.execPath, [NEXT_BIN, "build"], { stdio: "inherit", env });
+// The preview needs no middleware (no admin/API is published, Pages sends no CSP) and with
+// basePath Next 15 serves an EMPTY home page when middleware matches the basePath root.
+const MW = "src/middleware.ts";
+const MW_AWAY = "src/middleware.ts.pages-build";
+if (existsSync(MW_AWAY)) renameSync(MW_AWAY, MW); // recover from an interrupted run
+renameSync(MW, MW_AWAY);
+try {
+  execFileSync(process.execPath, [NEXT_BIN, "build"], { stdio: "inherit", env });
+} finally {
+  renameSync(MW_AWAY, MW);
+}
 
 console.log("› starting server…");
 const server = spawn(process.execPath, [NEXT_BIN, "start", "-p", String(PORT)], { env, stdio: "ignore" });
@@ -59,11 +69,13 @@ try {
   const pages = [...new Set([...sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => new URL(m[1]).pathname.replace(BASE, "") || "/"))];
   for (const p of pages) {
     const url = `${BASE}${p === "/" ? "/" : p.replace(/\/?$/, "/")}`;
-    const res = await get(url);
-    if (!res.ok) throw new Error(`${url} -> ${res.status}`);
+    const res = await fetch(origin + url); // follow redirects (basePath root)
+    const html = await res.text();
+    // never publish an empty or broken page
+    if (!res.ok || html.length < 2000 || !html.includes("</html>")) throw new Error(`${url} -> ${res.status}, ${html.length} bytes`);
     const file = path.join(OUT, p, "index.html");
     mkdirSync(path.dirname(file), { recursive: true });
-    writeFileSync(file, await res.text());
+    writeFileSync(file, html);
     console.log("  ✓", url);
   }
   writeFileSync(path.join(OUT, "404.html"), await (await get(`${BASE}/ova-stranica-ne-postoji/`)).text());

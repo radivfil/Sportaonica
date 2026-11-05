@@ -19,3 +19,4 @@ out-pages
 backups/
 *.dump
 *.gpg
+src/middleware.ts.pages-build
