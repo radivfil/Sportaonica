@@ -5,9 +5,8 @@ import logo from "../../../public/brand/logo.png";
 import { BeachBall, Blob, Heart, Sneaker, SoccerBall, Sparkle, Squiggle, Star } from "@/components/ui/Doodles";
 import { Icon } from "@/components/ui/Icon";
 import { Counter } from "@/components/ui/Counter";
-import { AGE_RANGE } from "@/lib/site";
 
-export function Hero({ locationsCount }: { locationsCount: number }) {
+export function Hero({ locationsCount, programsCount }: { locationsCount: number; programsCount: number }) {
   return (
     <section aria-labelledby="hero-title" className="relative -mt-[68px] overflow-hidden bg-flyer pt-[68px] lg:-mt-[76px] lg:pt-[76px]">
       {/* decorative, CSS-only animation (respects prefers-reduced-motion via globals.css) */}
@@ -39,22 +38,22 @@ export function Hero({ locationsCount }: { locationsCount: number }) {
           </h1>
 
           <p className="mt-6 max-w-xl text-lg leading-relaxed text-ink-soft sm:text-xl">
-            Program sportskih aktivnosti za djecu od {AGE_RANGE.min} do {AGE_RANGE.max} godina. Kroz igru razvijamo motoriku, snagu,
-            koncentraciju i prijateljstva — u Božjakovini, Brckovljanima i Sesvetskom Kraljevcu.
+            Program sportskih aktivnosti za djecu, uz treninge i za odrasle. Kroz igru razvijamo motoriku, snagu, koncentraciju i
+            prijateljstva, u Brckovljanima i Sesvetskom Kraljevcu.
           </p>
 
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-            <Link href="/upisi" className="btn-primary !min-h-[56px] !px-8 !text-lg">
-              Prijavi dijete <Icon name="arrow-right" />
+            <Link href="/aktivnosti" className="btn-primary !min-h-[56px] !px-8 !text-lg">
+              Programi i termini <Icon name="arrow-right" />
             </Link>
-            <Link href="/upisi#raspored" className="btn-secondary !min-h-[56px] !px-8 !text-lg">
-              <Icon name="calendar" /> Pogledaj termine
+            <Link href="/rodendani" className="btn-secondary !min-h-[56px] !px-8 !text-lg">
+              <Icon name="star" /> Dječji rođendani
             </Link>
           </div>
 
           <dl className="mt-10 grid max-w-lg grid-cols-3 gap-3">
             {[
-              { value: <><Counter to={AGE_RANGE.min} />–<Counter to={AGE_RANGE.max} /></>, label: "godina", bg: "bg-pink-100" },
+              { value: <Counter to={programsCount} />, label: "programa", bg: "bg-pink-100" },
               { value: <Counter to={locationsCount} />, label: locationsCount === 1 ? "lokacija" : "lokacije", bg: "bg-teal-100" },
               { value: <Counter to={4} />, label: "područja razvoja", bg: "bg-butter-100" },
             ].map((s) => (

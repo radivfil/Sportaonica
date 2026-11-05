@@ -1,0 +1,51 @@
+name: Deploy (Cloudflare Workers)
+
+# Manual deploy (Actions → Deploy → Run workflow). After the Cloudflare secrets are set you can add
+# `push: branches: [<default branch>]` for automatic demo deploys. Production needs environment approval.
+on:
+  workflow_dispatch:
+    inputs:
+      target:
+        description: "demo or production"
+        required: true
+        default: demo
+        type: choice
+        options: [demo, production]
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    # GitHub → Settings → Environments: "demo" and "production" (add required reviewers to production)
+    environment: ${{ github.event.inputs.target || 'demo' }}
+    env:
+      # build-time public values (inlined by Next.js) — GitHub environment *variables*
+      NEXT_PUBLIC_APP_ENV: ${{ vars.NEXT_PUBLIC_APP_ENV }}
+      NEXT_PUBLIC_SITE_URL: ${{ vars.NEXT_PUBLIC_SITE_URL }}
+      NEXT_PUBLIC_TURNSTILE_SITE_KEY: ${{ vars.NEXT_PUBLIC_TURNSTILE_SITE_KEY }}
+      SUPABASE_URL: ${{ vars.SUPABASE_URL }}
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm run cf:build
+      - run: npm run cf:size
+      - name: Deploy
+        run: |
+          if [ "${{ github.event.inputs.target }}" = "production" ]; then
+            npx wrangler deploy --env production
+          else
+            npx wrangler deploy
+          fi
+      - name: Smoke test /api/health
+        run: |
+          sleep 10
+          curl -fsS "${NEXT_PUBLIC_SITE_URL}/api/health" | tee /dev/stderr | grep -q '"status":"ok"'

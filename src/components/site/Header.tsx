@@ -68,7 +68,7 @@ export function Header({ phone, telHref }: { phone: string; telHref: string }) {
             {phone}
           </a>
           <Link href="/upisi" className="btn-primary hidden !min-h-[44px] !px-5 !py-2 sm:inline-flex">
-            Prijavi dijete
+            Upiši se
           </Link>
           <button
             type="button"
@@ -105,7 +105,7 @@ export function Header({ phone, telHref }: { phone: string; telHref: string }) {
           </ul>
         </nav>
         <div className="mt-6 grid gap-3">
-          <Link href="/upisi" className="btn-primary w-full">Prijavi dijete</Link>
+          <Link href="/upisi" className="btn-primary w-full">Upiši se</Link>
           <a href={telHref} className="btn-secondary w-full">
             <Icon name="phone" /> Nazovi {phone}
           </a>

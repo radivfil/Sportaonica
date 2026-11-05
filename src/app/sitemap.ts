@@ -1,16 +1,17 @@
 import type { MetadataRoute } from "next";
-import { repo } from "@/lib/data";
+import { publicRepo } from "@/lib/data";
 import { SITE_URL } from "@/lib/site";
 
 export const dynamic = "force-dynamic";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const posts = await repo().listPosts({ status: "published" });
+  const posts = await publicRepo().listPosts({ status: "published" });
   const now = new Date();
   const pages: [string, number, MetadataRoute.Sitemap[number]["changeFrequency"]][] = [
     ["/", 1, "weekly"],
-    ["/upisi", 0.9, "daily"],
-    ["/aktivnosti", 0.8, "monthly"],
+    ["/aktivnosti", 0.9, "daily"],
+    ["/upisi", 0.8, "daily"],
+    ["/rodendani", 0.7, "monthly"],
     ["/lokacije", 0.8, "monthly"],
     ["/o-nama", 0.6, "yearly"],
     ["/novosti", 0.6, "weekly"],

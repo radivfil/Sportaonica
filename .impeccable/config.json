@@ -1,0 +1,14 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "overused-font",
+        "value": "arial",
+        "createdAt": "2026-11-05T10:35:24.948Z",
+        "reason": "Claude: HTML e-mail templates need a web-safe font stack (email clients do not load web fonts); the site itself uses Baloo 2 / Nunito Sans"
+      }
+    ]
+  }
+}

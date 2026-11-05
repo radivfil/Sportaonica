@@ -2,12 +2,12 @@
 
 import Image from "next/image";
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { GalleryImage } from "@/lib/gallery";
+import type { GalleryImage } from "@/lib/data/types";
 import { Icon } from "@/components/ui/Icon";
 import { asset } from "@/lib/site";
 
 /** Responsive masonry-like grid + accessible lightbox (native <dialog>, keyboard + swipe). */
-export function Gallery({ images, limit, priorityCount = 0 }: { images: GalleryImage[]; limit?: number; priorityCount?: number }) {
+export function Gallery({ images, limit, priorityCount = 0 }: { images: Pick<GalleryImage, "id" | "src" | "alt" | "width" | "height">[]; limit?: number; priorityCount?: number }) {
   const shown = limit ? images.slice(0, limit) : images;
   const [index, setIndex] = useState<number | null>(null);
   const dialogRef = useRef<HTMLDialogElement>(null);
@@ -42,7 +42,7 @@ export function Gallery({ images, limit, priorityCount = 0 }: { images: GalleryI
     <>
       <ul className="columns-2 gap-3 sm:gap-4 md:columns-3 lg:columns-4 [&>li]:mb-3 sm:[&>li]:mb-4">
         {shown.map((img, i) => (
-          <li key={img.src} className="break-inside-avoid">
+          <li key={img.id} className="break-inside-avoid">
             <button
               type="button"
               onClick={() => open(i)}

@@ -8,20 +8,22 @@ export interface EmailMessage {
   replyTo?: string;
 }
 
+export type SendResult = { ok: boolean; mode: "resend" | "console"; error?: string };
+
 /**
  * Sends via Resend's HTTP API when RESEND_API_KEY is set; otherwise prints the
- * e-mail to the server console (demo mode). Never throws — a failed e-mail
- * must not break a successful registration.
+ * e-mail to the server console (local/demo). Never throws: the caller (outbox)
+ * records failures and retries.
  */
-export async function sendEmail(msg: EmailMessage): Promise<{ ok: boolean; mode: "resend" | "console" }> {
+export async function sendEmail(msg: EmailMessage): Promise<SendResult> {
   const key = process.env.RESEND_API_KEY;
   if (!key) {
     console.log(
       [
         "",
-        "┌─ 📧 DEMO E-MAIL (not sent) ─────────────────────────────",
-        `│ To:      ${msg.to}`,
-        `│ Subject: ${msg.subject}`,
+        "┌─ 📧 DEMO E-MAIL (nije poslan) ───────────────────────────",
+        `│ Za:     ${msg.to}`,
+        `│ Naslov: ${msg.subject}`,
         "├──────────────────────────────────────────────────────────",
         ...msg.text.split("\n").map((l) => `│ ${l}`),
         "└──────────────────────────────────────────────────────────",
@@ -41,11 +43,16 @@ export async function sendEmail(msg: EmailMessage): Promise<{ ok: boolean; mode:
         text: msg.text,
         reply_to: msg.replyTo,
       }),
+      signal: AbortSignal.timeout(10_000),
     });
-    if (!res.ok) console.error("Resend error", res.status, await res.text());
-    return { ok: res.ok, mode: "resend" };
+    if (!res.ok) {
+      const body = (await res.text()).slice(0, 300);
+      console.error("Resend error", res.status, body);
+      return { ok: false, mode: "resend", error: `${res.status} ${body}` };
+    }
+    return { ok: true, mode: "resend" };
   } catch (err) {
     console.error("E-mail send failed", err);
-    return { ok: false, mode: "resend" };
+    return { ok: false, mode: "resend", error: (err as Error).message };
   }
 }

@@ -2,50 +2,22 @@
 
 import Link from "next/link";
 import { useEffect, useRef } from "react";
-import type { Activity, Location, SlotWithStats } from "@/lib/data/types";
-import type { SlotDescription } from "@/lib/email/templates";
+import type { Activity, Location } from "@/lib/data/types";
+import type { BookedSession } from "@/lib/booking";
 import { Icon } from "@/components/ui/Icon";
 import { Star, Sparkle, BeachBall } from "@/components/ui/Doodles";
 
 export type BookingSuccess = {
   ok: true;
-  registration: { id: string; status: "confirmed" | "waitlist"; childName: string; email: string };
-  slot: SlotDescription;
-  waitlistPosition: number | null;
+  sessions: BookedSession[];
+  childName: string;
+  email: string;
   demoCancelUrl?: string;
   activity: Activity;
   location: Location;
-  slotData: SlotWithStats;
+  adult: boolean;
   staticPreview?: boolean;
 };
-
-/** Weekly-recurring .ics event, generated in the browser. */
-function icsHref(d: BookingSuccess) {
-  const s = d.slotData;
-  const now = new Date();
-  const diff = (s.dayOfWeek - (((now.getDay() + 6) % 7) + 1) + 7) % 7;
-  const first = new Date(now);
-  first.setDate(now.getDate() + diff);
-  const ymd = `${first.getFullYear()}${String(first.getMonth() + 1).padStart(2, "0")}${String(first.getDate()).padStart(2, "0")}`;
-  const t = (hm: string) => `${hm.replace(":", "")}00`;
-  const byday = ["MO", "TU", "WE", "TH", "FR", "SA", "SU"][s.dayOfWeek - 1];
-  const ics = [
-    "BEGIN:VCALENDAR",
-    "VERSION:2.0",
-    "PRODID:-//Sportaonica//HR",
-    "BEGIN:VEVENT",
-    `UID:${d.registration.id}@sportaonica`,
-    `DTSTAMP:${now.toISOString().replace(/[-:]/g, "").slice(0, 15)}Z`,
-    `DTSTART;TZID=Europe/Zagreb:${ymd}T${t(s.startTime)}`,
-    `DTEND;TZID=Europe/Zagreb:${ymd}T${t(s.endTime)}`,
-    `RRULE:FREQ=WEEKLY;BYDAY=${byday}`,
-    `SUMMARY:Sportaonica — ${d.activity.name}`,
-    `LOCATION:${d.location.venue}\\, ${d.location.address}\\, ${d.location.city}`,
-    "END:VEVENT",
-    "END:VCALENDAR",
-  ].join("\r\n");
-  return `data:text/calendar;charset=utf-8,${encodeURIComponent(ics)}`;
-}
 
 export function Confirmation({ data }: { data: BookingSuccess }) {
   const headingRef = useRef<HTMLHeadingElement>(null);
@@ -55,7 +27,8 @@ export function Confirmation({ data }: { data: BookingSuccess }) {
     h.focus({ preventScroll: true });
     h.scrollIntoView({ block: "center", behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
   }, []);
-  const waitlist = data.registration.status === "waitlist";
+  const allWait = data.sessions.every((s) => s.status === "waitlist");
+  const someWait = data.sessions.some((s) => s.status === "waitlist");
 
   return (
     <div className="card relative overflow-hidden p-6 text-center sm:p-10">
@@ -64,65 +37,53 @@ export function Confirmation({ data }: { data: BookingSuccess }) {
         <Sparkle className="absolute right-8 top-10 w-8 animate-float" fill="#F2ACA4" />
         <BeachBall className="absolute bottom-5 right-5 w-12 animate-float-slow" />
       </div>
-      <div className={`mx-auto inline-flex h-20 w-20 items-center justify-center rounded-full ${waitlist ? "bg-butter-200" : "bg-teal-200"}`}>
-        <Icon name={waitlist ? "clock" : "check"} className="h-10 w-10 text-ink" />
+      <div className={`mx-auto inline-flex h-20 w-20 items-center justify-center rounded-full ${allWait ? "bg-butter-200" : "bg-teal-200"}`}>
+        <Icon name={allWait ? "clock" : "check"} className="h-10 w-10 text-ink" />
       </div>
       <h2 ref={headingRef} tabIndex={-1} className="mt-5 text-3xl font-extrabold outline-none sm:text-4xl" data-testid="confirmation-title">
-        {waitlist ? "Na listi ste čekanja!" : "Prijava je zaprimljena!"}
+        {allWait ? "Na listi ste čekanja!" : "Prijava je zaprimljena!"}
       </h2>
       <p className="mx-auto mt-3 max-w-lg text-lg text-ink-soft" role="status">
-        {waitlist ? (
-          <>
-            <strong className="text-ink">{data.registration.childName}</strong> je na listi čekanja
-            {data.waitlistPosition ? (
-              <>
-                {" "}
-                (redni broj <strong className="text-ink">{data.waitlistPosition}</strong>)
-              </>
-            ) : null}
-            . Čim se mjesto oslobodi, automatski vas upisujemo i javljamo e-mailom.
-          </>
-        ) : (
-          <>
-            <strong className="text-ink">{data.registration.childName}</strong> ima rezervirano mjesto. Potvrdu smo poslali na{" "}
-            <strong className="break-words text-ink">{data.registration.email}</strong>.
-          </>
-        )}
+        <strong className="text-ink">{data.childName}</strong>{" "}
+        {allWait ? "je na listi čekanja. Čim se mjesto oslobodi, automatski dobivate mjesto i javljamo vam e-mailom." : "ima rezervirano mjesto."} Potvrdu s osobnom poveznicom za otkazivanje poslali smo na{" "}
+        <strong className="break-words text-ink">{data.email}</strong>.
       </p>
 
-      <dl className="relative mx-auto mt-8 grid max-w-md gap-2.5 rounded-3xl bg-teal-50 p-5 text-left">
-        {[
-          ["Aktivnost", data.slot.activityName],
-          ["Lokacija", `${data.slot.locationName}`],
-          ["Termin", `${data.slot.day}, ${data.slot.time}`],
-        ].map(([k, v]) => (
-          <div key={k} className="flex justify-between gap-4">
-            <dt className="font-semibold text-ink-soft">{k}</dt>
-            <dd className="text-right font-extrabold text-ink">{v}</dd>
-          </div>
+      <ul className="relative mx-auto mt-8 grid max-w-lg gap-2 text-left">
+        {data.sessions.map((s) => (
+          <li key={s.slotId} className="flex flex-wrap items-center justify-between gap-2 rounded-2xl bg-teal-50 p-4">
+            <span className="min-w-0">
+              <span className="block font-extrabold text-ink">{s.activityName}</span>
+              <span className="block text-sm font-semibold text-ink-soft">
+                {s.when} · {s.locationName}
+              </span>
+            </span>
+            <span className={`shrink-0 rounded-full px-3 py-1 text-sm font-extrabold ${s.status === "waitlist" ? "bg-butter-200 text-ink" : "bg-teal-200 text-ink"}`}>
+              {s.status === "waitlist" ? `Lista čekanja${s.waitlistPosition ? ` (${s.waitlistPosition}.)` : ""}` : "Upisano"}
+            </span>
+          </li>
         ))}
-      </dl>
+      </ul>
+      {someWait && !allWait && <p className="relative mx-auto mt-3 max-w-lg text-sm text-ink-soft">Za termine na listi čekanja javit ćemo vam se e-mailom čim se mjesto oslobodi.</p>}
 
       <div className="relative mt-8 flex flex-col justify-center gap-3 sm:flex-row">
-        {!waitlist && (
-          <a href={icsHref(data)} download="sportaonica-trening.ics" className="btn-navy">
-            <Icon name="calendar" /> Dodaj u kalendar
-          </a>
-        )}
         <Link href="/cesta-pitanja" className="btn-secondary">
-          Što ponijeti na trening?
+          Što ponijeti?
+        </Link>
+        <Link href="/aktivnosti" className="btn-ghost">
+          Pogledaj druge programe
         </Link>
       </div>
 
       {data.staticPreview && (
         <p className="relative mx-auto mt-8 max-w-lg rounded-2xl border-2 border-dashed border-ink/20 bg-white p-4 text-sm text-ink-soft">
-          <strong className="text-ink">Pregled dizajna:</strong> ovo je statična verzija stranice — prijava nije spremljena niti je poslan e-mail.
-          U punoj verziji roditelj odmah dobiva potvrdu e-mailom, a vlasnik obavijest.
+          <strong className="text-ink">Pregled dizajna:</strong> ovo je statična verzija stranice. Prijava nije spremljena i e-mail nije poslan. U punoj
+          verziji roditelj odmah dobiva potvrdu s osobnom poveznicom za otkazivanje, a vlasnica obavijest.
         </p>
       )}
       {data.demoCancelUrl && (
         <p className="relative mx-auto mt-8 max-w-lg rounded-2xl border-2 border-dashed border-ink/20 bg-white p-4 text-sm text-ink-soft">
-          <strong className="text-ink">Demo način:</strong> e-mailovi se ispisuju u konzolu poslužitelja. Osobna poveznica za otkazivanje:{" "}
+          <strong className="text-ink">DEMO:</strong> e-mailovi se ispisuju u konzolu poslužitelja. Osobna poveznica za otkazivanje:{" "}
           <a href={data.demoCancelUrl} className="break-all font-bold text-navy underline" data-testid="demo-cancel-link">
             {data.demoCancelUrl}
           </a>

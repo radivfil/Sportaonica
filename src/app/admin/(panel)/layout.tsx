@@ -1,9 +1,9 @@
 import Link from "next/link";
-import { requireAdmin } from "@/lib/admin-guard";
+import { requireAdmin } from "@/lib/auth/admin";
 import { AdminNav } from "@/components/admin/AdminNav";
 import { Logo } from "@/components/site/Logo";
 import { logout } from "../auth-actions";
-import { isSupabase } from "@/lib/data";
+import { APP_ENV, usesSupabase } from "@/lib/env";
 
 export const dynamic = "force-dynamic";
 
@@ -17,7 +17,7 @@ export default async function PanelLayout({ children }: { children: React.ReactN
           <AdminNav variant="side" />
         </div>
         <div className="mt-6 grid gap-2 border-t border-ink/10 pt-5 text-sm">
-          <p className="truncate text-ink-soft">{session.sub}</p>
+          <p className="truncate text-ink-soft">{session.email}</p>
           <Link href="/" target="_blank" className="font-bold text-navy underline">Otvori web stranicu ↗</Link>
           <form action={logout}>
             <button className="font-bold text-coral-700 underline">Odjava</button>
@@ -34,9 +34,9 @@ export default async function PanelLayout({ children }: { children: React.ReactN
           </div>
           <AdminNav variant="top" />
         </header>
-        {!isSupabase() && (
+        {APP_ENV !== "production" && (
           <p className="no-print border-b border-butter-300 bg-butter-100 px-4 py-2 text-center text-sm font-semibold text-ink">
-            Demo način: podaci se spremaju u lokalnu JSON datoteku. Za produkciju spojite Supabase (vidi README).
+            {usesSupabase() ? "DEMO okruženje: koristite isključivo izmišljene podatke." : "Lokalni način: podaci se spremaju u lokalnu JSON datoteku (.data/db.json)."}
           </p>
         )}
         <main className="mx-auto max-w-6xl px-4 py-6 sm:px-6 lg:py-10">{children}</main>

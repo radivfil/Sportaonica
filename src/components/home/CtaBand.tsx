@@ -18,7 +18,7 @@ export function CtaBand({ telHref, phone }: { telHref: string; phone: string }) 
             <p className="mt-3 max-w-lg text-lg text-white/85">Prijava traje dvije minute. Odaberite termin, a potvrdu dobivate odmah na e-mail.</p>
             <div className="mt-7 flex flex-col gap-3 sm:flex-row">
               <Link href="/upisi" className="btn bg-white !text-navy hover:-translate-y-0.5 hover:bg-butter-50">
-                Prijavi dijete <Icon name="arrow-right" />
+                Upiši se <Icon name="arrow-right" />
               </Link>
               <a href={telHref} className="btn border-2 border-white/60 text-white hover:bg-white/10">
                 <Icon name="phone" /> {phone}

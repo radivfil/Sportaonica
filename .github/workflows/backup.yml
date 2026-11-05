@@ -1,0 +1,46 @@
+name: Nightly encrypted backup
+
+# Every night: supabase db dump (roles, schema, data) → tar.gz → age-encrypted
+# (public key only; the private key is kept offline by the owner) → private
+# Cloudflare R2 bucket. Keeps 7 daily + 4 weekly copies. Pings a heartbeat on success.
+# In production this is the SECOND copy, next to Supabase Pro's own daily backups.
+on:
+  schedule:
+    - cron: "17 1 * * *" # 01:17 UTC ≈ 02:17/03:17 Zagreb
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: backup
+  cancel-in-progress: false
+
+jobs:
+  backup:
+    # skipped until the backup bucket is configured (repository/environment variable R2_BUCKET)
+    if: vars.R2_BUCKET != ''
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    environment: ${{ vars.BACKUP_ENVIRONMENT || 'production' }}
+    env:
+      SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+      AGE_PUBLIC_KEY: ${{ vars.AGE_PUBLIC_KEY }}
+      R2_BUCKET: ${{ vars.R2_BUCKET }}
+      R2_ENDPOINT: https://${{ vars.R2_ACCOUNT_ID }}.r2.cloudflarestorage.com
+      AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+      AWS_DEFAULT_REGION: auto
+      HEARTBEAT_URL: ${{ secrets.HEARTBEAT_URL }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+      - name: Install age + psql
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq age postgresql-client
+      - name: Dump, encrypt, upload, prune
+        run: bash scripts/backup/backup.sh
+      - name: Heartbeat (only after a successful upload)
+        if: success() && env.HEARTBEAT_URL != ''
+        run: curl -fsS -m 10 --retry 3 "$HEARTBEAT_URL"

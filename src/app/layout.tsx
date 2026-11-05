@@ -1,7 +1,10 @@
 import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
-import { BASE_PATH, DEFAULT_DESCRIPTION, SITE_NAME, SITE_URL, SLOGAN, STATIC_DEMO } from "@/lib/site";
+import { headers } from "next/headers";
+import { BASE_PATH, DEFAULT_DESCRIPTION, SITE_NAME, SITE_URL, SLOGAN } from "@/lib/site";
+import { SHOW_DEMO_MARKER } from "@/lib/env";
+import { DemoMarker } from "@/components/ui/DemoBadge";
 
 /**
  * Self-hosted variable fonts (SIL OFL), subset to Latin + Croatian letters
@@ -28,20 +31,12 @@ const body = localFont({
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: `${SITE_NAME} — sportska škola za djecu | Božjakovina, Brckovljani, Sesvetski Kraljevec`,
+    default: `${SITE_NAME}: sport za djecu i odrasle | Brckovljani i Sesvetski Kraljevec`,
     template: `%s | ${SITE_NAME}`,
   },
   description: DEFAULT_DESCRIPTION,
   applicationName: SITE_NAME,
-  keywords: [
-    "sportska škola za djecu",
-    "univerzalna sportska škola",
-    "sport za djecu Brckovljani",
-    "sport za djecu Božjakovina",
-    "Sesvetski Kraljevec",
-    "sportske aktivnosti za predškolce",
-    "mini rukomet",
-  ],
+  keywords: ["sport za djecu", "sportska igraonica", "sport za djecu Brckovljani", "sport za djecu Sesvetski Kraljevec", "dječji rođendani Brckovljani", "pilates Brckovljani", "sportske aktivnosti za predškolce"],
   openGraph: {
     type: "website",
     locale: "hr_HR",
@@ -54,8 +49,8 @@ export const metadata: Metadata = {
   alternates: { canonical: "/" },
   formatDetection: { telephone: false },
   icons: { icon: [{ url: `${BASE_PATH}/icon.svg`, type: "image/svg+xml" }], apple: `${BASE_PATH}/apple-icon.png` },
-  // the static preview must not compete with the real site in search results
-  ...(STATIC_DEMO ? { robots: { index: false, follow: false } } : {}),
+  // the demo must not compete with the real site in search results
+  ...(SHOW_DEMO_MARKER ? { robots: { index: false, follow: false } } : {}),
 };
 
 export const viewport: Viewport = {
@@ -65,14 +60,18 @@ export const viewport: Viewport = {
   viewportFit: "cover",
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const nonce = (await headers()).get("x-nonce") ?? undefined;
   return (
     <html lang="hr" className={`${display.variable} ${body.variable}`} suppressHydrationWarning>
       <head>
         {/* enables JS-only reveal animations; content stays visible without JS */}
-        <script dangerouslySetInnerHTML={{ __html: "document.documentElement.classList.add('js')" }} />
+        <script nonce={nonce} dangerouslySetInnerHTML={{ __html: "document.documentElement.classList.add('js')" }} />
       </head>
-      <body>{children}</body>
+      <body>
+        {children}
+        {SHOW_DEMO_MARKER && <DemoMarker />}
+      </body>
     </html>
   );
 }

@@ -13,3 +13,9 @@ test-results
 .DS_Store
 lighthouse-*.json
 out-pages
+.open-next
+.wrangler
+.dev.vars
+backups/
+*.dump
+*.gpg

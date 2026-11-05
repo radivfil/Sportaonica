@@ -1,14 +1,15 @@
 /**
- * Builds a static preview of the public site for GitHub Pages.
+ * Static DESIGN PREVIEW of the public site for GitHub Pages (fictional data only).
  *
- *   npm run build:pages            -> ./out-pages (upload/push to the gh-pages branch)
+ *   npm run build:pages            -> ./out-pages  (publish to the gh-pages branch)
  *
- * GitHub Pages cannot run Node, so: the site is built with
- * NEXT_PUBLIC_STATIC_DEMO=1 (forms are simulated, admin hidden), served locally,
- * crawled into HTML files and combined with the static assets.
- * For the real site (bookings, admin, e-mails) deploy to Vercel instead.
+ * GitHub Pages cannot run a server, so the site is built with
+ * NEXT_PUBLIC_STATIC_DEMO=1 (forms are simulated, server-side filters hidden,
+ * admin not published), started locally on the fictional JSON seed, crawled
+ * into HTML files and combined with the static assets.
+ * The real site (bookings, admin, e-mails) runs on Cloudflare Workers + Supabase.
  */
-import { spawn, execSync } from "node:child_process";
+import { spawn, execFileSync } from "node:child_process";
 import { cpSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
 import path from "node:path";
 
@@ -17,28 +18,36 @@ const OWNER = process.env.PAGES_OWNER || "radivfil";
 const BASE = `/${REPO}`;
 const PORT = 3300;
 const OUT = path.resolve("out-pages");
+const NEXT_BIN = path.resolve("node_modules/next/dist/bin/next");
 const env = {
   ...process.env,
+  APP_ENV: "local",
+  NEXT_PUBLIC_APP_ENV: "demo", // DEMO marker + noindex
   NEXT_PUBLIC_STATIC_DEMO: "1",
   NEXT_PUBLIC_BASE_PATH: BASE,
   NEXT_PUBLIC_SITE_URL: `https://${OWNER.toLowerCase()}.github.io${BASE}`,
   DATA_DIR: ".data/pages",
   RATE_LIMIT_DISABLED: "1",
+  SUPABASE_URL: "",
+  SUPABASE_ANON_KEY: "",
 };
 
 rmSync(".data/pages", { recursive: true, force: true });
 console.log("› next build (static preview)…");
-execSync("npx next build", { stdio: "inherit", env });
+execFileSync(process.execPath, [NEXT_BIN, "build"], { stdio: "inherit", env });
 
 console.log("› starting server…");
-const server = spawn("npx", ["next", "start", "-p", String(PORT)], { env, stdio: "ignore", detached: true });
+const server = spawn(process.execPath, [NEXT_BIN, "start", "-p", String(PORT)], { env, stdio: "ignore" });
 const origin = `http://localhost:${PORT}`;
-const get = (p) => fetch(origin + p);
+const get = (p) => fetch(origin + p, { redirect: "manual" });
 for (let i = 0; ; i++) {
   try {
-    if ((await get(`${BASE}/`)).ok) break;
+    if ((await fetch(`${origin}${BASE}/api/health/`)).ok) break;
   } catch {}
-  if (i > 60) throw new Error("server did not start");
+  if (i > 120) {
+    server.kill();
+    throw new Error("server did not start");
+  }
   await new Promise((r) => setTimeout(r, 500));
 }
 
@@ -47,7 +56,7 @@ try {
   mkdirSync(OUT, { recursive: true });
 
   const sitemap = await (await get(`${BASE}/sitemap.xml`)).text();
-  const pages = [...sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => new URL(m[1]).pathname.replace(BASE, "") || "/");
+  const pages = [...new Set([...sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => new URL(m[1]).pathname.replace(BASE, "") || "/"))];
   for (const p of pages) {
     const url = `${BASE}${p === "/" ? "/" : p.replace(/\/?$/, "/")}`;
     const res = await get(url);
@@ -65,9 +74,7 @@ try {
   cpSync(".next/static", path.join(OUT, "_next/static"), { recursive: true });
   cpSync("public", OUT, { recursive: true });
   writeFileSync(path.join(OUT, ".nojekyll"), ""); // keep the _next folder
-  console.log(`\n✔ Static preview in ${OUT} — ${pages.length} pages`);
+  console.log(`\n✔ Static preview in ${OUT}: ${pages.length} pages`);
 } finally {
-  try {
-    process.kill(-server.pid);
-  } catch {}
+  server.kill();
 }

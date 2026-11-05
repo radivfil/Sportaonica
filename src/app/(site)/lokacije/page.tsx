@@ -6,8 +6,8 @@ import { getActivities, getLocations, getSettings, getSlots } from "@/lib/querie
 import { locationLd } from "@/lib/seo";
 
 export const metadata: Metadata = {
-  title: "Lokacije — Božjakovina, Brckovljani, Sesvetski Kraljevec",
-  description: "Sport za djecu u Brckovljanima, Božjakovini i Sesvetskom Kraljevcu. Adrese dvorana, raspored treninga i karta.",
+  title: "Lokacije: Brckovljani i Sesvetski Kraljevec",
+  description: "Sportaonica u Brckovljanima (Sportska ulica 1, novi tržni centar) i Sesvetskom Kraljevcu (Dugoselska cesta 44a). Adrese, radno vrijeme i programi.",
   alternates: { canonical: "/lokacije" },
 };
 
@@ -15,15 +15,11 @@ export default async function LocationsPage() {
   const [locations, slots, activities, settings] = await Promise.all([getLocations(), getSlots(), getActivities(), getSettings()]);
   return (
     <>
-      <PageHero
-        title="Lokacije"
-        intro="Treninge održavamo na tri lokacije u okolici Sesvetskog Kraljevca i Dugog Sela. Odaberite onu koja vam je najbliža."
-        crumbs={[{ name: "Lokacije", path: "/lokacije" }]}
-      />
+      <PageHero title="Lokacije" intro="Programe održavamo na dvije lokacije. Odaberite onu koja vam je najbliža." crumbs={[{ name: "Lokacije", path: "/lokacije" }]} />
       <div className="container py-16">
         <LocationCards locations={locations} slots={slots} activities={activities} headingLevel="h2" />
       </div>
-      <JsonLd data={locations.map((l) => locationLd(l, slots, settings))} />
+      <JsonLd data={locations.map((l) => locationLd(l, settings))} />
     </>
   );
 }

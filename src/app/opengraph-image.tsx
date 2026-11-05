@@ -1,8 +1,10 @@
+/* eslint-disable @next/next/no-img-element -- ImageResponse (Satori) only supports <img> */
 import { ImageResponse } from "next/og";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 
 export const runtime = "nodejs";
+export const dynamic = "force-static"; // rendered at build time (no filesystem on Cloudflare Workers)
 export const alt = "Sportaonica — Sport koji gradi zdrave navike za cijeli život!";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
@@ -48,7 +50,7 @@ export default async function OgImage() {
             display: "flex",
           }}
         >
-          Sportska škola za djecu 3–10 god. · Božjakovina · Brckovljani · Sesvetski Kraljevec
+          Sport za djecu i odrasle · Brckovljani · Sesvetski Kraljevec
         </div>
       </div>
     ),

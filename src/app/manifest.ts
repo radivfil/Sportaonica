@@ -3,7 +3,7 @@ import { BASE_PATH } from "@/lib/site";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "Sportaonica — sportska škola za djecu",
+    name: "Sportaonica",
     short_name: "Sportaonica",
     start_url: `${BASE_PATH}/`,
     display: "standalone",

@@ -1,34 +1,44 @@
 import "server-only";
 import path from "node:path";
-import os from "node:os";
 import type { Repository } from "./repository";
 import { JsonRepository } from "./json-repo";
 import { SupabaseRepository } from "./supabase-repo";
+import { supabaseConfig, usesSupabase } from "../env";
+import { anonClient, serviceClient, sessionClient } from "../supabase/clients";
+import { requireAdmin } from "../auth/admin";
 
 export type { Repository } from "./repository";
 export * from "./types";
 
 declare global {
-  var __sportaonicaRepo: Repository | undefined;
+  var __sportaonicaJson: JsonRepository | undefined;
 }
 
 export function dataDir(): string {
-  if (process.env.DATA_DIR) return path.resolve(process.env.DATA_DIR);
-  // Vercel's filesystem is read-only except /tmp (ephemeral — demo only!)
-  if (process.env.VERCEL) return path.join(os.tmpdir(), "sportaonica-data");
-  return path.resolve(process.cwd(), ".data");
+  return path.resolve(process.env.DATA_DIR || path.join(process.cwd(), ".data"));
 }
 
-export function isSupabase() {
-  return process.env.DATA_PROVIDER === "supabase" && !!process.env.SUPABASE_URL && !!process.env.SUPABASE_SERVICE_ROLE_KEY;
+function json(): JsonRepository {
+  return (globalThis.__sportaonicaJson ??= new JsonRepository(dataDir(), "sustav", true));
 }
 
-/** Single repository instance per server process. */
-export function repo(): Repository {
-  if (!globalThis.__sportaonicaRepo) {
-    globalThis.__sportaonicaRepo = isSupabase()
-      ? new SupabaseRepository(process.env.SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!, process.env.SUPABASE_STORAGE_BUCKET || "uploads")
-      : new JsonRepository(dataDir());
-  }
-  return globalThis.__sportaonicaRepo;
+/** Public website. Supabase: anon key, so RLS lets it read only public data. */
+export function publicRepo(): Repository {
+  return usesSupabase() ? new SupabaseRepository(anonClient(), supabaseConfig().bucket) : json().as("javno (roditelj)", false);
+}
+
+/** Owner area. Verifies the admin session (2FA) and runs with the owner's own JWT. */
+export async function adminRepo(): Promise<Repository> {
+  const session = await requireAdmin();
+  return usesSupabase() ? new SupabaseRepository(await sessionClient(), supabaseConfig().bucket) : json().as(session.email, true);
+}
+
+/** Server-only jobs (e-mail outbox, retention). Supabase: service role. */
+export function systemRepo(): Repository {
+  return usesSupabase() ? new SupabaseRepository(serviceClient(), supabaseConfig().bucket) : json().as("sustav", true);
+}
+
+/** Test helper: reset the local JSON store. */
+export function jsonStore(): JsonRepository {
+  return json();
 }

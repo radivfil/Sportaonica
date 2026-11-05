@@ -13,7 +13,7 @@ export function PageHero({ title, intro, crumbs, children }: { title: string; in
       </div>
       <div className="container relative">
         <Breadcrumbs items={crumbs} />
-        <h1 className="max-w-3xl text-4xl font-extrabold sm:text-5xl lg:text-6xl">{title}</h1>
+        <h1 className="max-w-3xl text-[2.1rem] font-extrabold [hyphens:auto] [overflow-wrap:break-word] sm:text-5xl lg:text-6xl">{title}</h1>
         <Squiggle className="mt-3 h-3 w-28" color="#F2ACA4" />
         {intro && <p className="mt-5 max-w-2xl text-lg leading-relaxed text-ink-soft sm:text-xl">{intro}</p>}
         {children}

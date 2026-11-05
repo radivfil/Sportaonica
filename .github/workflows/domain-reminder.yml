@@ -1,0 +1,28 @@
+name: Domain renewal reminder
+
+# Fails (→ GitHub sends an e-mail to repo admins) when the .hr domain expires
+# within 30 days. Set the repository variable DOMAIN_EXPIRES=YYYY-MM-DD after
+# every renewal (date from the registrar's panel). See docs/runbook.md.
+on:
+  schedule:
+    - cron: "0 7 * * 1" # every Monday
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Check expiry date
+        env:
+          DOMAIN_EXPIRES: ${{ vars.DOMAIN_EXPIRES }}
+        run: |
+          if [ -z "$DOMAIN_EXPIRES" ]; then echo "::warning::Set repository variable DOMAIN_EXPIRES (YYYY-MM-DD)"; exit 0; fi
+          days=$(( ( $(date -u -d "$DOMAIN_EXPIRES" +%s) - $(date -u +%s) ) / 86400 ))
+          echo "sportaonica.hr expires in $days days ($DOMAIN_EXPIRES)"
+          if [ "$days" -le 30 ]; then
+            echo "::error::Domena istječe za $days dana ($DOMAIN_EXPIRES). Obnovite je kod registrara i ažurirajte DOMAIN_EXPIRES."
+            exit 1
+          fi

@@ -23,7 +23,7 @@ export function ContactForm({ headingLevel = "h3" }: { headingLevel?: "h2" | "h3
     setState("sending");
     setMessage(null);
     if (STATIC_DEMO) {
-      // static preview: no server — simulate a successful send
+      // static design preview: no server, simulate a successful send
       await new Promise((r) => setTimeout(r, 700));
       setState("sent");
       return;

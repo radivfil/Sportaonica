@@ -1,128 +1,99 @@
 import "server-only";
-import { repo } from "./data";
-import type { CancelResult, Registration } from "./data/types";
-import { isAgeInRange } from "./age";
-import { WEEKDAYS } from "./format";
-import { SITE_URL } from "./site";
-import { sendEmail } from "./email/send";
-import {
-  cancellationEmail,
-  confirmationEmail,
-  ownerRegistrationEmail,
-  promotedEmail,
-  type SlotDescription,
-} from "./email/templates";
+import { publicRepo } from "./data";
+import type { BookingErrorCode, CancelResult, SlotWithStats } from "./data/types";
+import { ageRangeLabel, isAgeAllowed } from "./data/rules";
+import { slotWhen } from "./format";
+import { APP_ENV } from "./env";
+import { cancelUrl, dispatchOutbox, hashToken, newCancelToken } from "./notifications";
 import type { RegistrationData } from "./validation";
 
-export async function describeSlot(slotId: string): Promise<SlotDescription | null> {
-  const r = repo();
-  const slot = await r.getSlot(slotId);
-  if (!slot) return null;
-  const [activity, location] = await Promise.all([r.getActivity(slot.activityId), r.getLocation(slot.locationId)]);
-  return {
-    activityName: activity?.name ?? "Aktivnost",
-    locationName: location?.name ?? "Lokacija",
-    venue: location?.venue ?? "",
-    address: location ? `${location.address}, ${location.postalCode} ${location.city}` : "",
-    day: WEEKDAYS[slot.dayOfWeek],
-    time: `${slot.startTime}–${slot.endTime}`,
-  };
+export interface BookedSession {
+  slotId: string;
+  activityName: string;
+  locationName: string;
+  when: string;
+  status: "active" | "waitlist";
+  waitlistPosition: number | null;
 }
 
-export const cancelUrl = (reg: Registration) => `${SITE_URL}/otkazivanje/${encodeURIComponent(reg.cancelToken)}`;
-
 export type CreateRegistrationResult =
-  | { ok: true; registration: Registration; slot: SlotDescription }
-  | { ok: false; status: number; code: string; message: string; fieldErrors?: Record<string, string> };
+  | { ok: true; sessions: BookedSession[]; childName: string; email: string; demoCancelUrl?: string }
+  | { ok: false; status: number; code: BookingErrorCode | "INVALID"; message: string; fieldErrors?: Record<string, string> };
 
-/** Business rules for a public registration (validation already done by zod). */
+const MESSAGES: Record<BookingErrorCode, string> = {
+  SLOT_FULL: "Netko je upravo zauzeo zadnje mjesto. Možete se upisati na listu čekanja ili odabrati drugi termin.",
+  SLOT_NOT_FOUND: "Odabrani termin više nije dostupan. Odaberite drugi.",
+  SLOT_INACTIVE: "Odabrani termin više nije dostupan za prijave.",
+  DUPLICATE: "Ovaj polaznik je već prijavljen u odabrani termin. Provjerite e-mail s potvrdom.",
+  AGE_OUT_OF_RANGE: "Dob ne odgovara programu.",
+  INVALID: "Provjerite unesene podatke.",
+};
+
+/** Business flow for a public registration (zod validation already done). */
 export async function createPublicRegistration(data: RegistrationData): Promise<CreateRegistrationResult> {
-  const r = repo();
-  const slot = await r.getSlot(data.slotId);
-  if (!slot || slot.status !== "active") {
-    return { ok: false, status: 404, code: "SLOT_NOT_FOUND", message: "Odabrani termin više nije dostupan. Molimo odaberite drugi." };
-  }
-  const activity = await r.getActivity(slot.activityId);
-  if (!activity) return { ok: false, status: 404, code: "SLOT_NOT_FOUND", message: "Aktivnost nije pronađena." };
+  const repo = publicRepo();
+  const [slots, activities, locations] = await Promise.all([repo.listSlots(), repo.listActivities(), repo.listLocations()]);
+  const chosen = data.slotIds.map((id) => slots.find((s) => s.id === id));
+  if (chosen.some((s) => !s)) return { ok: false, status: 404, code: "SLOT_NOT_FOUND", message: MESSAGES.SLOT_NOT_FOUND };
+  const picked = chosen as SlotWithStats[];
+  const activity = activities.find((a) => a.id === picked[0].activityId);
+  if (!activity || picked.some((s) => s.activityId !== activity.id)) return { ok: false, status: 404, code: "SLOT_NOT_FOUND", message: MESSAGES.SLOT_NOT_FOUND };
 
-  if (!isAgeInRange(data.childBirthDate, activity.ageMin, activity.ageMax)) {
-    const msg = `Program „${activity.name}” namijenjen je djeci od ${activity.ageMin} do ${activity.ageMax} godina. Odaberite program prikladan dobi djeteta ili nas kontaktirajte.`;
+  // friendly early message (the database checks again)
+  if (!isAgeAllowed(activity, data.childBirthDate)) {
+    const msg = `Program „${activity.name}” namijenjen je dobi: ${ageRangeLabel(activity)}. Odaberite prikladan program ili nas kontaktirajte.`;
     return { ok: false, status: 422, code: "AGE_OUT_OF_RANGE", message: msg, fieldErrors: { childBirthDate: msg } };
   }
 
-  // duplicate protection: same child, same slot, still active
-  const existing = await r.listRegistrations({ slotId: slot.id });
-  const dup = existing.find(
-    (x) =>
-      x.status !== "cancelled" &&
-      x.childBirthDate === data.childBirthDate &&
-      x.childName.trim().toLowerCase() === data.childName.trim().toLowerCase(),
-  );
-  if (dup) {
-    return { ok: false, status: 409, code: "DUPLICATE", message: "Ovo dijete je već prijavljeno u odabrani termin. Provjerite e-mail s potvrdom." };
-  }
-
-  const result = await r.book(
-    slot.id,
-    {
-      slotId: slot.id,
+  const token = newCancelToken();
+  const result = await repo.book({
+    slotIds: data.slotIds,
+    input: {
       parentName: data.parentName,
       phone: data.phone,
       email: data.email,
       childName: data.childName,
       childBirthDate: data.childBirthDate,
       healthNote: data.healthNote || undefined,
-      source: data.source || undefined,
       gdprConsent: true,
-      marketingConsent: !!data.marketingConsent,
     },
-    { allowWaitlist: !!data.waitlist },
-  );
+    cancelTokenHash: hashToken(token),
+    allowWaitlist: !!data.waitlist,
+  });
 
   if (!result.ok) {
-    if (result.code === "SLOT_FULL") {
-      return {
-        ok: false,
-        status: 409,
-        code: "SLOT_FULL",
-        message: "Netko je upravo zauzeo zadnje mjesto u ovom terminu. Možete se upisati na listu čekanja ili odabrati drugi termin.",
-      };
-    }
-    return { ok: false, status: 404, code: result.code, message: "Odabrani termin više nije dostupan." };
+    const status = result.code === "SLOT_FULL" || result.code === "DUPLICATE" ? 409 : result.code === "SLOT_NOT_FOUND" ? 404 : 422;
+    return { ok: false, status, code: result.code, message: MESSAGES[result.code] };
   }
 
-  const desc = (await describeSlot(slot.id))!;
-  await notifyRegistration(result.registration, desc);
-  return { ok: true, registration: result.registration, slot: desc };
+  // send confirmation now (outbox row already committed; retried by cron if this fails)
+  await dispatchOutbox(new Map([[result.groupId, token]])).catch((e) => console.error("dispatchOutbox", e));
+
+  const locById = new Map(locations.map((l) => [l.id, l]));
+  const sessions: BookedSession[] = result.registrations.map((r) => {
+    const slot = picked.find((s) => s.id === r.slotId)!;
+    return {
+      slotId: r.slotId,
+      activityName: activity.name,
+      locationName: locById.get(slot.locationId)?.name ?? "",
+      when: slotWhen(slot),
+      status: r.status,
+      waitlistPosition: r.waitlistPosition,
+    };
+  });
+  return {
+    ok: true,
+    sessions,
+    childName: data.childName,
+    email: data.email,
+    // Without Resend (local/demo) e-mails go to the console, so show the personal link on screen.
+    demoCancelUrl: !process.env.RESEND_API_KEY && APP_ENV !== "production" ? cancelUrl(token) : undefined,
+  };
 }
 
-async function notifyRegistration(reg: Registration, slot: SlotDescription) {
-  const settings = await repo().getSettings();
-  const parent = confirmationEmail(reg, slot, cancelUrl(reg), settings);
-  const owner = ownerRegistrationEmail(reg, slot, `${SITE_URL}/admin/prijave?q=${encodeURIComponent(reg.email)}`, settings);
-  await Promise.all([
-    sendEmail({ to: reg.email, ...parent, replyTo: settings.email }),
-    sendEmail({ to: process.env.OWNER_NOTIFICATION_EMAIL || settings.email, ...owner, replyTo: reg.email }),
-  ]);
-}
-
-export async function notifyPromoted(promoted: Registration | null | undefined) {
-  if (!promoted) return;
-  const slot = await describeSlot(promoted.slotId);
-  if (!slot) return;
-  const settings = await repo().getSettings();
-  const mail = promotedEmail(promoted, slot, cancelUrl(promoted), settings);
-  await sendEmail({ to: promoted.email, ...mail, replyTo: settings.email });
-}
-
-/** Cancel via the parent's personal link. Frees the seat and promotes the waitlist. */
-export async function cancelWithToken(token: string): Promise<CancelResult> {
-  const result = await repo().cancelByToken(token);
-  if (result.cancelled && !result.alreadyCancelled) {
-    const slot = await describeSlot(result.cancelled.slotId);
-    const settings = await repo().getSettings();
-    if (slot) await sendEmail({ to: result.cancelled.email, ...cancellationEmail(result.cancelled, slot, settings) });
-    await notifyPromoted(result.promoted);
-  }
+/** Parent cancels via the personal link. Frees seats, promotes the waitlist, sends e-mails. */
+export async function cancelWithToken(token: string, ids?: string[]): Promise<CancelResult> {
+  const result = await publicRepo().cancelByToken(token, ids);
+  if (result.cancelled.length || result.promoted) await dispatchOutbox().catch((e) => console.error("dispatchOutbox", e));
   return result;
 }

@@ -69,9 +69,10 @@ export function PageTitle({ title, children, intro }: { title: string; intro?: s
   );
 }
 
-export const STATUS_LABEL = { confirmed: "Upisan/a", waitlist: "Lista čekanja", cancelled: "Otkazano" } as const;
+export { STATUS_LABEL } from "@/lib/status";
 export const STATUS_CLASS = {
-  confirmed: "bg-teal-100 text-teal-700",
+  active: "bg-teal-100 text-teal-700",
   waitlist: "bg-butter-200 text-ink",
-  cancelled: "bg-ink/10 text-ink-soft",
+  cancelled_parent: "bg-ink/10 text-ink-soft",
+  cancelled_admin: "bg-ink/10 text-ink-soft",
 } as const;

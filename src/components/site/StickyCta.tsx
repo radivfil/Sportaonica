@@ -20,7 +20,7 @@ export function StickyCta({ telHref }: { telHref: string }) {
           </a>
         ) : (
           <Link href="/upisi" className="btn-primary !min-h-[52px] flex-[1.6] !px-3">
-            Prijavi dijete <Icon name="arrow-right" />
+            Upiši se <Icon name="arrow-right" />
           </Link>
         )}
       </div>

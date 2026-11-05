@@ -1,58 +1,53 @@
-import { repo } from "@/lib/data";
+import { adminRepo } from "@/lib/data";
 import type { RegistrationStatus } from "@/lib/data/types";
-import { isAdmin } from "@/lib/admin-guard";
-import { lookups } from "@/lib/admin-data";
+import { STATUS_LABEL, lookups } from "@/lib/admin-data";
 import { toCsv } from "@/lib/csv";
-import { ageOn } from "@/lib/age";
-import { WEEKDAYS, formatBirthDate, formatDateTime } from "@/lib/format";
+import { ageYears } from "@/lib/data/rules";
+import { formatBirthDate, formatDateTime, slotWhen } from "@/lib/format";
 
-const STATUS: Record<RegistrationStatus, string> = { confirmed: "Upisan/a", waitlist: "Lista čekanja", cancelled: "Otkazano" };
+export const dynamic = "force-dynamic";
 
 /**
  * GET /api/admin/export?format=csv|excel&aktivnost=&lokacija=&termin=&status=&q=
- * Both formats are UTF-8 with BOM. "excel" uses ';' which Croatian-locale Excel
- * opens directly into columns; "csv" uses ',' for Google Sheets / Numbers.
+ * Both formats are UTF-8 with BOM. "excel" uses ';' (Croatian-locale Excel opens
+ * it directly in columns); "csv" uses ',' (Google Sheets / Numbers).
+ * Every export is written to the audit log.
  */
 export async function GET(req: Request) {
-  if (!(await isAdmin())) return new Response("Unauthorized", { status: 401 });
+  const repo = await adminRepo();
   const sp = new URL(req.url).searchParams;
-  const [{ slotMap, actMap, locMap }, regs] = await Promise.all([
-    lookups(),
-    repo().listRegistrations({
-      activityId: sp.get("aktivnost") || undefined,
-      locationId: sp.get("lokacija") || undefined,
-      slotId: sp.get("termin") || undefined,
-      status: (sp.get("status") as RegistrationStatus) || undefined,
-      q: sp.get("q") || undefined,
-    }),
-  ]);
+  const filter = {
+    activityId: sp.get("aktivnost") || undefined,
+    locationId: sp.get("lokacija") || undefined,
+    slotId: sp.get("termin") || undefined,
+    status: (sp.get("status") as RegistrationStatus) || undefined,
+    q: sp.get("q") || undefined,
+  };
+  const [{ slotMap, actMap, locMap }, regs] = await Promise.all([lookups(repo), repo.listRegistrations(filter)]);
+  const rows = regs
+    .filter((r) => !r.anonymizedAt)
+    .map((r) => {
+      const s = slotMap.get(r.slotId);
+      return [
+        STATUS_LABEL[r.status],
+        s ? actMap.get(s.activityId)?.name : "",
+        s ? locMap.get(s.locationId)?.name : "",
+        s ? slotWhen(s) : "",
+        r.childName,
+        r.childBirthDate ? formatBirthDate(r.childBirthDate) : "",
+        r.childBirthDate ? ageYears(r.childBirthDate) : "",
+        r.parentName,
+        r.phone,
+        r.email,
+        r.healthNote ?? "",
+        r.paid ? "da" : "ne",
+        r.adminNote ?? "",
+        formatDateTime(r.createdAt),
+      ];
+    });
   const excel = sp.get("format") === "excel";
-  const headers = [
-    "Status", "Aktivnost", "Lokacija", "Dan", "Vrijeme", "Dijete", "Datum rođenja", "Dob", "Roditelj", "Telefon", "E-mail",
-    "Napomena o zdravlju", "Kako su čuli", "Plaćeno", "Marketing privola", "Interna napomena", "Prijavljeno",
-  ];
-  const rows = regs.map((r) => {
-    const s = slotMap.get(r.slotId);
-    return [
-      STATUS[r.status],
-      s ? actMap.get(s.activityId)?.name : "",
-      s ? locMap.get(s.locationId)?.name : "",
-      s ? WEEKDAYS[s.dayOfWeek] : "",
-      s ? `${s.startTime}–${s.endTime}` : "",
-      r.childName,
-      formatBirthDate(r.childBirthDate),
-      ageOn(r.childBirthDate),
-      r.parentName,
-      r.phone,
-      r.email,
-      r.healthNote ?? "",
-      r.source ?? "",
-      r.paid ? "da" : "ne",
-      r.marketingConsent ? "da" : "ne",
-      r.adminNote ?? "",
-      formatDateTime(r.createdAt),
-    ];
-  });
+  const headers = ["Status", "Aktivnost", "Lokacija", "Termin", "Polaznik", "Datum rođenja", "Dob", "Roditelj", "Telefon", "E-mail", "Napomena o zdravlju", "Plaćeno", "Interna napomena", "Prijavljeno"];
+  await repo.audit("registration.export", undefined, `${rows.length} redaka; filter=${JSON.stringify(filter)}`);
   const body = toCsv(headers, rows, excel ? ";" : ",");
   const date = new Date().toISOString().slice(0, 10);
   return new Response(body, {

@@ -65,3 +65,17 @@ export function startOfDay(d = new Date()) {
   x.setHours(0, 0, 0, 0);
   return x;
 }
+
+/** "14. 11. 2026." from YYYY-MM-DD (no time-zone drift). */
+export function formatYmd(ymd: string) {
+  const [y, m, d] = ymd.split("-").map(Number);
+  return `${d}. ${m}. ${y}.`;
+}
+
+/** Human description of when a slot takes place. */
+export function slotWhen(slot: { kind: "weekly" | "single"; dayOfWeek: Weekday; date?: string; startTime: string; endTime: string; validFrom?: string; validTo?: string }) {
+  const time = `${slot.startTime}–${slot.endTime}`;
+  if (slot.kind === "single" && slot.date) return `${WEEKDAYS[slot.dayOfWeek]}, ${formatYmd(slot.date)}, ${time}`;
+  const range = slot.validTo ? ` (do ${formatYmd(slot.validTo)})` : "";
+  return `${WEEKDAYS[slot.dayOfWeek]}, ${time}, svaki tjedan${range}`;
+}

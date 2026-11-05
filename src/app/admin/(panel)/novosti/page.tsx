@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { repo } from "@/lib/data";
+import { adminRepo } from "@/lib/data";
 import { formatDate } from "@/lib/format";
 import { Flash, PageTitle } from "@/components/admin/Fields";
 
@@ -7,7 +7,7 @@ export const metadata = { title: "Novosti" };
 
 export default async function PostsAdmin({ searchParams }: { searchParams: Promise<{ ok?: string }> }) {
   const sp = await searchParams;
-  const posts = await repo().listPosts();
+  const posts = await (await adminRepo()).listPosts();
   return (
     <>
       <PageTitle title="Novosti" intro="Obavijesti koje se prikazuju na početnoj i stranici Novosti.">

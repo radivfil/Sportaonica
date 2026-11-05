@@ -1,6 +1,5 @@
 import Link from "next/link";
 import type { Activity, Location, SlotWithStats } from "@/lib/data/types";
-import { WEEKDAYS } from "@/lib/format";
 import { Icon } from "@/components/ui/Icon";
 import { Reveal } from "@/components/ui/Reveal";
 import { DemoBadge } from "@/components/ui/DemoBadge";
@@ -44,7 +43,7 @@ export function LocationCards({
   const H4 = headingLevel === "h2" ? "h3" : "h4";
   const act = new Map(activities.map((a) => [a.id, a]));
   return (
-    <ul className="grid gap-6 md:grid-cols-3">
+    <ul className="grid gap-6 md:grid-cols-2">
       {locations.map((loc, i) => {
         const own = slots.filter((s) => s.locationId === loc.id && act.has(s.activityId));
         return (
@@ -65,14 +64,18 @@ export function LocationCards({
                     {loc.postalCode} {loc.city}
                   </span>
                 </address>
-                <H4 className="mt-5 text-sm font-extrabold uppercase tracking-wide text-ink-soft">Raspored</H4>
-                <ul className="mt-2 grid gap-1.5 text-[0.95rem]">
-                  {own.map((s) => (
-                    <li key={s.id} className="flex items-baseline justify-between gap-3 border-b border-dashed border-ink/10 pb-1.5">
-                      <span className="font-bold text-ink">{act.get(s.activityId)!.name}</span>
-                      <span className="shrink-0 text-ink-soft">
-                        {WEEKDAYS[s.dayOfWeek].slice(0, 3)} {s.startTime}
-                      </span>
+                {loc.hours && (
+                  <>
+                    <H4 className="mt-5 text-sm font-extrabold uppercase tracking-wide text-ink-soft">Radno vrijeme</H4>
+                    <p className="mt-1 whitespace-pre-line font-semibold text-ink">{loc.hours}</p>
+                  </>
+                )}
+                {loc.description && <p className="mt-3 text-sm text-ink-soft">{loc.description}</p>}
+                <H4 className="mt-5 text-sm font-extrabold uppercase tracking-wide text-ink-soft">Programi</H4>
+                <ul className="mt-2 flex flex-wrap gap-1.5 text-[0.95rem]">
+                  {[...new Set(own.map((s) => s.activityId))].map((id) => (
+                    <li key={id} className="rounded-full bg-cream px-3 py-1 font-bold text-ink">
+                      {act.get(id)!.name}
                     </li>
                   ))}
                 </ul>
@@ -80,7 +83,7 @@ export function LocationCards({
                   <a href={loc.mapUrl} target="_blank" rel="noopener noreferrer" className="btn-secondary !min-h-[44px] flex-1 !px-4 text-base">
                     <Icon name="map" /> Karta
                   </a>
-                  <Link href={`/upisi?lokacija=${loc.slug}`} className="btn-navy !min-h-[44px] flex-1 !px-4 text-base">
+                  <Link href={`/aktivnosti?lokacija=${loc.slug}#programi`} className="btn-navy !min-h-[44px] flex-1 !px-4 text-base">
                     Termini
                   </Link>
                 </div>

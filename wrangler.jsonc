@@ -1,0 +1,47 @@
+// Cloudflare Workers (OpenNext). Docs: README → "Deploy na Cloudflare".
+// Secrets are NOT stored here: `npx wrangler secret put NAME` (or the dashboard).
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "sportaonica",
+  "main": ".open-next/worker.js",
+  "compatibility_date": "2026-10-01",
+  "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+  "assets": {
+    "directory": ".open-next/assets",
+    "binding": "ASSETS"
+  },
+  // next/image optimisation via Cloudflare Images (free tier: 5 000 unique transformations / month)
+  "images": {
+    "binding": "IMAGES"
+  },
+  "observability": { "enabled": true },
+  // Non-secret configuration. Phase A (demo) values; production overrides in env.production.
+  "vars": {
+    "APP_ENV": "demo",
+    "NEXT_PUBLIC_APP_ENV": "demo",
+    "NEXT_PUBLIC_SITE_URL": "https://sportaonica.<subdomena>.workers.dev",
+    "SUPABASE_STORAGE_BUCKET": "uploads",
+    "EMAIL_FROM": "Sportaonica <prijave@sportaonica.hr>",
+    "EMAIL_DAILY_LIMIT": "100",
+    "EMAIL_WARN_AT": "70"
+  },
+  "env": {
+    "production": {
+      "name": "sportaonica-production",
+      "routes": [
+        { "pattern": "sportaonica.hr", "custom_domain": true },
+        { "pattern": "www.sportaonica.hr", "custom_domain": true }
+      ],
+      "images": { "binding": "IMAGES" },
+      "vars": {
+        "APP_ENV": "production",
+        "NEXT_PUBLIC_APP_ENV": "production",
+        "NEXT_PUBLIC_SITE_URL": "https://sportaonica.hr",
+        "SUPABASE_STORAGE_BUCKET": "uploads",
+        "EMAIL_FROM": "Sportaonica <prijave@sportaonica.hr>",
+        "EMAIL_DAILY_LIMIT": "100",
+        "EMAIL_WARN_AT": "70"
+      }
+    }
+  }
+}

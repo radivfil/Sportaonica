@@ -1,0 +1,40 @@
+name: Monthly restore test
+
+# "A backup that has not been restored is not a backup."
+# Downloads the newest encrypted backup, decrypts it, restores it into a
+# throw-away local Supabase database and compares row counts with the manifest
+# written at backup time. Fails (→ GitHub e-mail) if anything is off.
+on:
+  schedule:
+    - cron: "40 4 3 * *" # 3rd of every month
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  restore:
+    # skipped until the backup bucket is configured (repository/environment variable R2_BUCKET)
+    if: vars.R2_BUCKET != ''
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    # separate environment: only this job can read the age PRIVATE key
+    environment: restore-test
+    env:
+      AGE_SECRET_KEY: ${{ secrets.AGE_SECRET_KEY }}
+      R2_BUCKET: ${{ vars.R2_BUCKET }}
+      R2_ENDPOINT: https://${{ vars.R2_ACCOUNT_ID }}.r2.cloudflarestorage.com
+      AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+      AWS_DEFAULT_REGION: auto
+    steps:
+      - uses: actions/checkout@v4
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+      - name: Install age + psql
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq age postgresql-client
+      - name: Start a local Supabase database
+        run: supabase db start
+      - name: Restore newest backup and verify
+        run: bash scripts/backup/restore-test.sh

@@ -8,10 +8,12 @@ export const ADMIN_NAV = [
   { href: "/admin/prijave", label: "Prijave", emoji: "🧒" },
   { href: "/admin/termini", label: "Termini", emoji: "🗓️" },
   { href: "/admin/aktivnosti", label: "Aktivnosti", emoji: "⚽" },
+  { href: "/admin/upiti", label: "Upiti i rođendani", emoji: "🎂" },
   { href: "/admin/novosti", label: "Novosti", emoji: "📰" },
+  { href: "/admin/galerija", label: "Galerija", emoji: "🖼️" },
   { href: "/admin/sadrzaj", label: "Sadržaj stranice", emoji: "✏️" },
-  { href: "/admin/poruke", label: "Poruke", emoji: "✉️" },
   { href: "/admin/postavke", label: "Postavke", emoji: "⚙️" },
+  { href: "/admin/dnevnik", label: "Dnevnik promjena", emoji: "🧾" },
 ];
 
 export function AdminNav({ variant }: { variant: "side" | "top" }) {

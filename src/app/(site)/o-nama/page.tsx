@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { PageHero } from "@/components/site/PageHero";
-import { TrainerBlock } from "@/components/home/TrainerBlock";
+import { People } from "@/components/home/People";
 import { Benefits } from "@/components/home/Benefits";
 import { CtaBand } from "@/components/home/CtaBand";
 import { Icon } from "@/components/ui/Icon";
@@ -8,8 +8,8 @@ import { getContent, getSettings } from "@/lib/queries";
 import { telHref } from "@/lib/format";
 
 export const metadata: Metadata = {
-  title: "O nama i treneru",
-  description: "Sportaonicu vodi profesor kineziologije i rukometni trener. Program je verificiran od Ministarstva znanosti, obrazovanja i mladih.",
+  title: "O nama",
+  description: "Upoznajte Sportaonicu i tim koji vodi programe. Program sportskih aktivnosti za djecu verificiran od Ministarstva znanosti, obrazovanja i mladih.",
   alternates: { canonical: "/o-nama" },
 };
 
@@ -17,9 +17,9 @@ export default async function AboutPage() {
   const [content, settings] = await Promise.all([getContent(), getSettings()]);
   return (
     <>
-      <PageHero title="O nama" intro="Sport koji gradi zdrave navike za cijeli život — to nam je misija na svakom treningu." crumbs={[{ name: "O nama", path: "/o-nama" }]} />
-      <section aria-labelledby="trainer-title" className="container py-16 sm:py-20">
-        <TrainerBlock trainer={content.trainer} />
+      <PageHero title={content.about.heading || "O nama"} intro={content.about.intro} crumbs={[{ name: "O nama", path: "/o-nama" }]} />
+      <section aria-label="Tim" className="container py-16 sm:py-20">
+        <People people={content.about.people} />
       </section>
       <section className="container pb-8">
         <div className="flex flex-col items-center gap-5 rounded-[2.5rem] bg-teal-100 p-8 text-center sm:flex-row sm:text-left">
@@ -28,9 +28,7 @@ export default async function AboutPage() {
           </span>
           <div>
             <h2 className="text-2xl font-extrabold">Verificiran program</h2>
-            <p className="mt-2 text-lg text-ink">
-              Program sportskih aktivnosti Sportaonica verificiran je od strane Ministarstva znanosti, obrazovanja i mladih.
-            </p>
+            <p className="mt-2 text-lg text-ink">Program sportskih aktivnosti Sportaonica verificiran je od strane Ministarstva znanosti, obrazovanja i mladih.</p>
           </div>
         </div>
       </section>

@@ -53,6 +53,53 @@ export function ActivityIcon({ icon, color, className = "h-20 w-20" }: { icon: I
           <path d="M12 72h72" stroke={S} strokeWidth="2.6" strokeLinecap="round" />
         </>
       )}
+      {icon === "toddler" && (
+        <>
+          {/* big hand holding a small hand + small ball */}
+          <circle cx="36" cy="30" r="9" fill="#F9D3B4" stroke={S} strokeWidth="2.6" />
+          <circle cx="60" cy="42" r="6.5" fill="#F9D3B4" stroke={S} strokeWidth="2.4" />
+          <path d="M36 39v20m0-14 14 4m10-1v12" stroke={S} strokeWidth="2.6" strokeLinecap="round" fill="none" />
+          <path d="M28 76l8-17 8 17M54 76l6-12 6 12" stroke={S} strokeWidth="2.6" strokeLinejoin="round" strokeLinecap="round" fill="none" />
+          <circle cx="72" cy="68" r="7" fill={fill} stroke={S} strokeWidth="2.4" />
+          <path d="M18 78h62" stroke={S} strokeWidth="2.4" strokeLinecap="round" />
+        </>
+      )}
+      {icon === "skates" && (
+        <>
+          <path d="M26 30h18v22h18c6 0 10 4 10 10H26z" fill={fill} stroke={S} strokeWidth="2.6" strokeLinejoin="round" />
+          <path d="M30 38h10M30 45h10" stroke={S} strokeWidth="2" strokeLinecap="round" />
+          <circle cx="33" cy="70" r="5" fill="#fff" stroke={S} strokeWidth="2.4" />
+          <circle cx="49" cy="70" r="5" fill="#fff" stroke={S} strokeWidth="2.4" />
+          <circle cx="65" cy="70" r="5" fill="#fff" stroke={S} strokeWidth="2.4" />
+          <path d="M70 26l2 5 5 1-4 3 1 5-4-3-4 3 1-5-4-3 5-1z" fill="#F7EFB5" stroke={S} strokeWidth="1.8" strokeLinejoin="round" />
+        </>
+      )}
+      {icon === "pilates" && (
+        <>
+          <rect x="14" y="66" width="68" height="8" rx="4" fill={fill} stroke={S} strokeWidth="2.4" />
+          <circle cx="30" cy="48" r="7" fill="#F9D3B4" stroke={S} strokeWidth="2.6" />
+          <path d="M36 54l20 6 18-26M56 60l4 6" stroke={S} strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+          <path d="M64 22c4 2 6 6 4 10" stroke={S} strokeWidth="2" strokeLinecap="round" fill="none" />
+        </>
+      )}
+      {icon === "functional" && (
+        <>
+          <path d="M30 56h36" stroke={S} strokeWidth="4" strokeLinecap="round" />
+          <rect x="18" y="44" width="10" height="24" rx="3" fill={fill} stroke={S} strokeWidth="2.6" />
+          <rect x="68" y="44" width="10" height="24" rx="3" fill={fill} stroke={S} strokeWidth="2.6" />
+          <path d="M40 30c0-6 16-6 16 0v6H40z" fill="#91D2CE" stroke={S} strokeWidth="2.6" strokeLinejoin="round" />
+          <path d="M48 24v-4" stroke={S} strokeWidth="2.6" strokeLinecap="round" />
+          <path d="M18 78h60" stroke={S} strokeWidth="2.4" strokeLinecap="round" />
+        </>
+      )}
+      {icon === "workshop" && (
+        <>
+          <rect x="20" y="24" width="56" height="38" rx="5" fill="#fff" stroke={S} strokeWidth="2.6" />
+          <path d="M28 36h28M28 46h40M28 54h20" stroke={S} strokeWidth="2.4" strokeLinecap="round" />
+          <path d="M48 62v12m-10 0h20" stroke={S} strokeWidth="2.6" strokeLinecap="round" />
+          <circle cx="68" cy="34" r="6" fill={fill} stroke={S} strokeWidth="2.2" />
+        </>
+      )}
     </svg>
   );
 }

@@ -16,7 +16,7 @@ export default async function PrivacyPage() {
       <PageHero title="Politika privatnosti" crumbs={[{ name: "Politika privatnosti", path: "/politika-privatnosti" }]} />
       <div className="container max-w-3xl py-12">
         <p role="note" className="mb-10 rounded-3xl border-2 border-dashed border-coral bg-coral-100 p-5 font-semibold text-coral-700">
-          PREDLOŽAK — ovaj tekst je nacrt i mora ga pregledati pravni stručnjak prije objave. Podatke u uglatim zagradama potrebno je potvrditi.
+          PREDLOŽAK: ovaj tekst je nacrt i mora ga pregledati pravni stručnjak prije objave. Podatke u uglatim zagradama potrebno je potvrditi.
         </p>
         <div className="prose-sport">
           <h2>1. Voditelj obrade</h2>
@@ -28,8 +28,9 @@ export default async function PrivacyPage() {
           <h2>2. Koje podatke prikupljamo</h2>
           <ul>
             <li><strong>Podaci roditelja/skrbnika:</strong> ime i prezime, broj telefona, e-mail adresa.</li>
-            <li><strong>Podaci djeteta:</strong> ime i prezime, datum rođenja (radi raspoređivanja u dobnu skupinu) te, ako ih dobrovoljno navedete, napomene o zdravlju ili alergijama.</li>
-            <li><strong>Ostalo:</strong> kako ste čuli za nas (neobavezno), privole koje ste dali te tehnički zapisi nužni za sigurnost (npr. IP adresa u svrhu zaštite od zlouporabe, kratkotrajno).</li>
+            <li><strong>Podaci polaznika (djeteta ili odrasle osobe):</strong> ime i prezime, datum rođenja (radi provjere dobnog raspona programa) te, ako ih dobrovoljno navedete, napomene o zdravlju ili alergijama.</li>
+            <li><strong>Upiti za rođendane:</strong> ime, kontakt, željeni datum, broj djece i dob slavljenika.</li>
+            <li><strong>Ostalo:</strong> privola koju ste dali te tehnički zapisi nužni za sigurnost (zaštita od zlouporabe obrazaca koristi jednosmjerni sažetak IP adrese koji se mijenja svaki dan; same IP adrese ne spremamo).</li>
           </ul>
           <p>Prikupljamo samo podatke koji su nužni za provedbu programa (načelo smanjenja količine podataka).</p>
 
@@ -37,20 +38,21 @@ export default async function PrivacyPage() {
           <ul>
             <li>Provedba prijave i sudjelovanja djeteta u programu — izvršenje ugovora (čl. 6. st. 1. t. b) GDPR-a) i privola roditelja za podatke djeteta.</li>
             <li>Podaci o zdravlju (posebna kategorija) — isključivo uz izričitu privolu (čl. 9. st. 2. t. a) GDPR-a), radi sigurnosti djeteta na treningu.</li>
-            <li>Slanje obavijesti o novim programima — samo uz zasebnu, neobaveznu privolu koju možete povući u bilo kojem trenutku.</li>
             <li>Odgovaranje na upite putem kontakt obrasca — legitimni interes / predugovorne radnje.</li>
           </ul>
 
           <h2>4. Koliko dugo čuvamo podatke</h2>
           <p>
-            Podatke o prijavi čuvamo dok dijete sudjeluje u programu i najviše [12 mjeseci — potvrditi] nakon završetka sezone, osim ako propisi
-            zahtijevaju dulje čuvanje (npr. računovodstvena dokumentacija). Podatke s liste čekanja brišemo na kraju sezone.
+            Podatke o prijavi čuvamo dok traje program te najviše {s.retentionMonths} mjeseci nakon završetka termina ili otkazivanja, nakon čega se
+            osobni podaci automatski brišu (zapis ostaje samo kao anonimna statistika), osim ako propisi zahtijevaju dulje čuvanje [rok potvrditi s pravnim savjetnikom].
+            Sigurnosne kopije baze čuvaju se šifrirano najdulje 4 tjedna.
           </p>
 
           <h2>5. Tko ima pristup podacima</h2>
           <p>
-            Pristup imaju isključivo vlasnici i treneri Sportaonice. Koristimo pouzdane pružatelje usluga (hosting [Vercel], baza podataka [Supabase,
-            EU regija], slanje e-pošte [Resend]) s kojima su sklopljeni ugovori o obradi podataka. Podatke ne prodajemo niti ih ustupamo trećim
+            Pristup imaju isključivo vlasnica i ovlašteni treneri Sportaonice; administracija je zaštićena dvofaktorskom autentifikacijom, a svaka
+            izmjena, otkazivanje i izvoz bilježe se u dnevnik. Koristimo pouzdane pružatelje usluga (hosting [Cloudflare], baza podataka [Supabase,
+            EU regija, Frankfurt], slanje e-pošte [Resend], šifrirane sigurnosne kopije [Cloudflare R2, EU]) s kojima su sklopljeni ugovori o obradi podataka. Podatke ne prodajemo niti ih ustupamo trećim
             stranama u marketinške svrhe.
           </p>
 
@@ -60,7 +62,7 @@ export default async function PrivacyPage() {
           <h2>7. Vaša prava</h2>
           <p>
             Imate pravo na pristup, ispravak, brisanje, ograničenje obrade, prenosivost podataka te pravo na prigovor i povlačenje privole. Zahtjev
-            pošaljite na <a href={`mailto:${s.email}`}>{s.email}</a> — odgovorit ćemo u roku od 30 dana. Prijavu možete otkazati i putem osobne
+            pošaljite na <a href={`mailto:${s.email}`}>{s.email}</a>. Odgovorit ćemo u roku od 30 dana. Prijavu možete otkazati i putem osobne
             poveznice iz potvrdnog e-maila. Pritužbu možete podnijeti Agenciji za zaštitu osobnih podataka (azop.hr).
           </p>
 
@@ -75,7 +77,7 @@ export default async function PrivacyPage() {
           </p>
 
           <h2>9. Izmjene</h2>
-          <p>O značajnim izmjenama ove politike obavijestit ćemo vas na ovoj stranici. Zadnja izmjena: [datum — potvrditi].</p>
+          <p>O značajnim izmjenama ove politike obavijestit ćemo vas na ovoj stranici. Zadnja izmjena: [datum: potvrditi].</p>
         </div>
       </div>
     </>
